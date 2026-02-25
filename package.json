@@ -1,0 +1,24 @@
+{
+  "name": "interviewiq",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "npm install --prefix Backend && npm install --prefix Frontend && npm run build --prefix Frontend",
+    "start": "npm run start --prefix Backend"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/neellokhandwala/InterviewIQ.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/neellokhandwala/InterviewIQ/issues"
+  },
+  "homepage": "https://github.com/neellokhandwala/InterviewIQ#readme",
+  "dependencies": {
+    "cors": "^2.8.6"
+  }
+}
