@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/neellokhandwala/InterviewIQ#readme",
   "dependencies": {
+    "@stream-io/node-sdk": "^0.7.12",
     "cors": "^2.8.6"
   }
 }

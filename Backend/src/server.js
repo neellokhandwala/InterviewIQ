@@ -8,6 +8,7 @@ import { serve } from 'inngest/express';
 import { inngest, functions } from "./lib/inngest.js";
 import { clerkMiddleware } from '@clerk/express';
 import chatRoutes from "./routes/chatRoutes.js";
+import sessionRoutes from "./routes/sessionRoute.js"
 
 import { ENV } from './lib/env.js';
 import { connectDB } from './lib/db.js';
@@ -22,6 +23,7 @@ app.use(clerkMiddleware())
 
 app.use("/api/inngest",serve({client:inngest, functions}));
 app.use("api/chat", chatRoutes)
+app.use("api/sessions", sessionRoutes)
 
 app.get("/", (req, res) => {
     res.status(200).send("InterviewIQ Backend API is Live!");
