@@ -7,7 +7,7 @@ import cors from 'cors';
 import { serve } from 'inngest/express';
 import { inngest, functions } from "./lib/inngest.js";
 import { clerkMiddleware } from '@clerk/express';
-import { protectRoute } from './middleware/protectRoute.js';
+import chatRoutes from "./routes/chatRoutes.js";
 
 import { ENV } from './lib/env.js';
 import { connectDB } from './lib/db.js';
@@ -21,22 +21,14 @@ app.use(cors({ origin: ENV.CLIENT_URL, credentials: true }));
 app.use(clerkMiddleware())
 
 app.use("/api/inngest",serve({client:inngest, functions}));
+app.use("api/chat", chatRoutes)
 
 app.get("/", (req, res) => {
     res.status(200).send("InterviewIQ Backend API is Live!");
 });
 
 app.get("/health", (req, res) => {
-    req.auth;
     res.status(200).json({ msg: "Success Health Check" }); 
-});
-
-app.get("/books", (req, res) => {
-    res.status(200).json({ msg: "Success Books Check" }); 
-});
-
-app.get("/video-calls", protectRoute, (req, res) => {
-    res.status(200).json({ msg: "Success video call Check" }); 
 });
 
 const startServer = async () => {
