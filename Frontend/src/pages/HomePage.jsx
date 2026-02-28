@@ -1,5 +1,6 @@
 import { Link } from 'react-router';
 import Navbar from '../components/Navbar';
+import AnimatedCodeBox from '../components/AnimatedCodeBox';
 import {
   Code2,
   Users,
@@ -67,55 +68,9 @@ function HomePage() {
             </div>
           </div>
 
-          {/* Right Side - Code Editor Preview */}
+          {/* Right Side - Animated Code Editor Preview */}
           <div className="relative">
-            <div className="bg-slate-900 border border-slate-700 rounded-2xl overflow-hidden shadow-2xl">
-              {/* Editor Header */}
-              <div className="bg-slate-800 px-6 py-4 border-b border-slate-700 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                  <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-                  <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                </div>
-                <span className="text-sm text-slate-400 font-mono">solution.js</span>
-              </div>
-
-              {/* Code Content */}
-              <div className="p-6 text-sm font-mono text-slate-300 bg-slate-900">
-                <div className="space-y-2">
-                  <div>
-                    <span className="text-purple-400">function</span>{' '}
-                    <span className="text-blue-400">mergeSortedArrays</span>
-                    <span className="text-slate-400">(</span>
-                    <span>arr1, arr2</span>
-                    <span className="text-slate-400">)</span> {'{'}
-                  </div>
-                  <div className="ml-4 space-y-1">
-                    <div>
-                      <span className="text-purple-400">const</span>{' '}
-                      <span className="text-blue-400">result</span>
-                      <span className="text-slate-400"> = [];</span>
-                    </div>
-                    <div>
-                      <span className="text-purple-400">let</span> i = 0, j = 0;
-                    </div>
-                    <div>
-                      <span className="text-slate-500">// Merge logic here...</span>
-                    </div>
-                  </div>
-                  <div>{'}'}</div>
-                </div>
-              </div>
-
-              {/* Collaboration Indicator */}
-              <div className="bg-slate-800 px-6 py-3 border-t border-slate-700 flex items-center gap-2">
-                <div className="flex -space-x-2">
-                  <div className="w-6 h-6 rounded-full bg-blue-500 border border-slate-800"></div>
-                  <div className="w-6 h-6 rounded-full bg-purple-500 border border-slate-800"></div>
-                </div>
-                <span className="text-sm text-slate-400">2 collaborating now</span>
-              </div>
-            </div>
+            <AnimatedCodeBox />
           </div>
         </div>
       </section>
