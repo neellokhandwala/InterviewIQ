@@ -1,5 +1,7 @@
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import Navbar from '../components/Navbar';
+import AnimatedCodeBox from '../components/AnimatedCodeBox';
+import AnimatedCounter from '../components/AnimatedCounter';
 import {
   Code2,
   Users,
@@ -10,15 +12,24 @@ import {
   ArrowRight,
   Check,
 } from 'lucide-react';
-import { SignUpButton } from '@clerk/clerk-react';
+import { SignUpButton, useUser } from '@clerk/clerk-react';
 
 function HomePage() {
+  const navigate = useNavigate();
+  const { isSignedIn } = useUser();
+
+  const handleGetStartedNow = () => {
+    if (isSignedIn) {
+      navigate('/problems');
+    }
+  };
+
   return (
     <div className="bg-slate-950 text-slate-100 min-h-screen overflow-hidden">
       <Navbar />
 
       {/* HERO SECTION */}
-      <section className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-32">
+      <section className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-32">
         {/* Background accent */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl -z-10"></div>
 
@@ -56,72 +67,18 @@ function HomePage() {
               ))}
             </div>
 
-            {/* CTA Buttons */}
-            <div className="flex flex-wrap gap-4 pt-4">
-              <SignUpButton mode="modal">
-                <button className="px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold rounded-lg hover:shadow-lg hover:shadow-blue-500/50 transition-all duration-300 hover:scale-105 flex items-center gap-2">
-                  Start Free Trial
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-              </SignUpButton>
-            </div>
+
           </div>
 
-          {/* Right Side - Code Editor Preview */}
+          {/* Right Side - Animated Code Editor Preview */}
           <div className="relative">
-            <div className="bg-slate-900 border border-slate-700 rounded-2xl overflow-hidden shadow-2xl">
-              {/* Editor Header */}
-              <div className="bg-slate-800 px-6 py-4 border-b border-slate-700 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                  <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-                  <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                </div>
-                <span className="text-sm text-slate-400 font-mono">solution.js</span>
-              </div>
-
-              {/* Code Content */}
-              <div className="p-6 text-sm font-mono text-slate-300 bg-slate-900">
-                <div className="space-y-2">
-                  <div>
-                    <span className="text-purple-400">function</span>{' '}
-                    <span className="text-blue-400">mergeSortedArrays</span>
-                    <span className="text-slate-400">(</span>
-                    <span>arr1, arr2</span>
-                    <span className="text-slate-400">)</span> {'{'}
-                  </div>
-                  <div className="ml-4 space-y-1">
-                    <div>
-                      <span className="text-purple-400">const</span>{' '}
-                      <span className="text-blue-400">result</span>
-                      <span className="text-slate-400"> = [];</span>
-                    </div>
-                    <div>
-                      <span className="text-purple-400">let</span> i = 0, j = 0;
-                    </div>
-                    <div>
-                      <span className="text-slate-500">// Merge logic here...</span>
-                    </div>
-                  </div>
-                  <div>{'}'}</div>
-                </div>
-              </div>
-
-              {/* Collaboration Indicator */}
-              <div className="bg-slate-800 px-6 py-3 border-t border-slate-700 flex items-center gap-2">
-                <div className="flex -space-x-2">
-                  <div className="w-6 h-6 rounded-full bg-blue-500 border border-slate-800"></div>
-                  <div className="w-6 h-6 rounded-full bg-purple-500 border border-slate-800"></div>
-                </div>
-                <span className="text-sm text-slate-400">2 collaborating now</span>
-              </div>
-            </div>
+            <AnimatedCodeBox />
           </div>
         </div>
       </section>
 
       {/* STATS SECTION */}
-      <section className="border-y border-slate-800 bg-slate-900/50">
+      <section className="border-y border-slate-800 bg-slate-900/50 mt-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 grid grid-cols-2 md:grid-cols-4 gap-8">
           {[
             { label: 'Active Users', value: '5K+' },
@@ -129,10 +86,7 @@ function HomePage() {
             { label: 'Uptime', value: '99.9%' },
             { label: 'Languages Supported', value: '15+' },
           ].map((stat, i) => (
-            <div key={i} className="text-center">
-              <div className="text-3xl font-bold text-blue-400 mb-2">{stat.value}</div>
-              <div className="text-sm text-slate-400">{stat.label}</div>
-            </div>
+            <AnimatedCounter key={i} label={stat.label} finalValue={stat.value} />
           ))}
         </div>
       </section>
@@ -243,12 +197,22 @@ function HomePage() {
             Join thousands of developers preparing for technical interviews with confidence
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
-            <SignUpButton mode="modal">
-              <button className="px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold rounded-lg hover:shadow-lg hover:shadow-blue-500/50 transition-all duration-300 hover:scale-105 flex items-center gap-2">
+            {isSignedIn ? (
+              <button
+                onClick={handleGetStartedNow}
+                className="px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold rounded-lg hover:shadow-lg hover:shadow-blue-500/50 transition-all duration-300 hover:scale-105 flex items-center gap-2"
+              >
                 Get Started Now
                 <ArrowRight className="w-4 h-4" />
               </button>
-            </SignUpButton>
+            ) : (
+              <SignUpButton mode="modal">
+                <button className="px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold rounded-lg hover:shadow-lg hover:shadow-blue-500/50 transition-all duration-300 hover:scale-105 flex items-center gap-2">
+                  Get Started Now
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </SignUpButton>
+            )}
           </div>
         </div>
       </section>
