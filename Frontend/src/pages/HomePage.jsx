@@ -1,11 +1,10 @@
+import Navbar from "../components/Navbar";
+
 function HomePage() {
     return (
-        <div className="bg-gradient-to-br from-base-100 via-base-200 to-base-300">
-            <nav className="bg-base-100/80 backdrop-blur-md border-b border-primary/20 sticky top-0 z-50 shadow-lg">
-            <div className="max-w-7xl">
-
-            </div>
-            </nav>
+        <div className="bg-gradient-to-br from-base-100 via-base-200 to-base-300 min-h-screen">
+            <Navbar />
+            {/* Hero content will go here */}
         </div>
     );
 }
