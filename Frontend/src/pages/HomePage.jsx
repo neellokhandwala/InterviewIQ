@@ -21,7 +21,7 @@ function HomePage() {
       <section className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-32">
         {/* Background accent */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl -z-10"></div>
-        
+
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left Content */}
           <div className="space-y-8">
@@ -38,7 +38,7 @@ function HomePage() {
             </h1>
 
             <p className="text-xl text-slate-400 leading-relaxed max-w-lg">
-              Real-time collaboration, live code execution, and instant feedback. 
+              Real-time collaboration, live code execution, and instant feedback.
               Practice with peers or interviewers in a professional coding environment.
             </p>
 
@@ -64,9 +64,6 @@ function HomePage() {
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </SignUpButton>
-              <button className="px-8 py-3 border border-slate-700 text-slate-300 font-semibold rounded-lg hover:border-slate-600 hover:bg-slate-900 transition-all duration-300">
-                View Demo
-              </button>
             </div>
           </div>
 
@@ -252,56 +249,15 @@ function HomePage() {
                 <ArrowRight className="w-4 h-4" />
               </button>
             </SignUpButton>
-            <button className="px-8 py-3 border border-slate-700 text-slate-300 font-semibold rounded-lg hover:border-slate-600 hover:bg-slate-900 transition-all duration-300">
-              Schedule Demo
-            </button>
           </div>
         </div>
       </section>
 
       {/* FOOTER */}
       <footer className="border-t border-slate-800 bg-slate-900/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
-            <div>
-              <h4 className="font-semibold text-slate-100 mb-4">Product</h4>
-              <ul className="space-y-2 text-sm text-slate-400">
-                <li><a href="#" className="hover:text-slate-200 transition">Features</a></li>
-                <li><a href="#" className="hover:text-slate-200 transition">Pricing</a></li>
-                <li><a href="#" className="hover:text-slate-200 transition">Enterprise</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold text-slate-100 mb-4">Resources</h4>
-              <ul className="space-y-2 text-sm text-slate-400">
-                <li><a href="#" className="hover:text-slate-200 transition">Documentation</a></li>
-                <li><a href="#" className="hover:text-slate-200 transition">Blog</a></li>
-                <li><a href="#" className="hover:text-slate-200 transition">Community</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold text-slate-100 mb-4">Company</h4>
-              <ul className="space-y-2 text-sm text-slate-400">
-                <li><a href="#" className="hover:text-slate-200 transition">About</a></li>
-                <li><a href="#" className="hover:text-slate-200 transition">Contact</a></li>
-                <li><a href="#" className="hover:text-slate-200 transition">Privacy</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold text-slate-100 mb-4">Social</h4>
-              <ul className="space-y-2 text-sm text-slate-400">
-                <li><a href="#" className="hover:text-slate-200 transition">Twitter</a></li>
-                <li><a href="#" className="hover:text-slate-200 transition">GitHub</a></li>
-                <li><a href="#" className="hover:text-slate-200 transition">LinkedIn</a></li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-slate-800 pt-8 flex flex-col sm:flex-row justify-between items-center text-sm text-slate-400">
-            <p>&copy; 2024 InterviewIQ. All rights reserved.</p>
-            <div className="flex gap-6 mt-4 sm:mt-0">
-              <a href="#" className="hover:text-slate-200 transition">Terms</a>
-              <a href="#" className="hover:text-slate-200 transition">Privacy</a>
-            </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="border-slate-800 flex flex-col sm:flex-row justify-center items-center text-sm text-slate-400">
+            <p>&copy; 2026 InterviewIQ by Neel Lokhandwala. All rights reserved.</p>
           </div>
         </div>
       </footer>
