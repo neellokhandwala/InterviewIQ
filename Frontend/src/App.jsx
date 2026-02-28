@@ -1,5 +1,5 @@
 import { useUser } from '@clerk/clerk-react'
-import { Route, Routes } from 'react-router';
+import { Route, Routes, Navigate } from 'react-router';
 import HomePage from './pages/HomePage';
 import ProblemsPage from './pages/ProblemsPage';
 import { Toaster } from 'react-hot-toast';
