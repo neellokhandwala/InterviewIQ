@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router'
 import Navbar from '../components/Navbar'
 import { useUser } from '@clerk/clerk-react'
 import {
@@ -10,6 +11,7 @@ import { PROBLEMS_DATA } from '../data/problemsData'
 import toast from 'react-hot-toast'
 
 const DashboardPage = () => {
+  const navigate = useNavigate()
   const { user } = useUser()
   const firstName = user?.firstName || 'Coder'
 
@@ -64,6 +66,7 @@ const DashboardPage = () => {
         id: Date.now(),
         title: selectedProblem.title,
         difficulty: selectedProblem.difficulty,
+        problemId: selectedProblem.id,
         participants: ['You'],
         currentParticipants: 1,
         maxParticipants: 2,
@@ -73,11 +76,13 @@ const DashboardPage = () => {
       }
       const updated = [...activeSessions, newSession];
       setActiveSessions(updated)
-      localStorage.setItem(`activeSessions_${user.id}`, JSON.stringify(updated)) // ← ADD
+      localStorage.setItem(`activeSessions_${user.id}`, JSON.stringify(updated))
       setShowCreateModal(false)
       setSelectedProblem(null)
       setIsCreating(false)
       toast.success(`Session created for ${selectedProblem.title}!`)
+      // Navigate to the session
+      navigate(`/session/${newSession.id}/${newSession.problemId}`)
     }, 800)
   }
 
@@ -88,8 +93,10 @@ const DashboardPage = () => {
         s.id === sessionId ? { ...s, currentParticipants: s.currentParticipants + 1 } : s
       )
       setActiveSessions(updated)
-      localStorage.setItem(`activeSessions_${user.id}`, JSON.stringify(updated)) // ← ADD
+      localStorage.setItem(`activeSessions_${user.id}`, JSON.stringify(updated))
       toast.success(`Joined ${session.title}!`)
+      // Navigate to the session
+      navigate(`/session/${session.id}/${session.problemId}`)
     } else {
       toast.error('Session is full')
     }
