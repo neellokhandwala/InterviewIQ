@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronRight, Code, Zap } from 'lucide-react';
+import { useNavigate } from 'react-router';
 import Navbar from '../components/Navbar';
 import AnimatedCounter from '../components/AnimatedCounter';
 
 const ProblemsPage = () => {
+  const navigate = useNavigate();
   const [visibleProblems, setVisibleProblems] = useState([]);
   const [problemsLoading, setProblemsLoading] = useState(false);
 
@@ -174,7 +176,7 @@ const ProblemsPage = () => {
 
       <div className="flex items-center justify-between">
         <span className="text-xs text-slate-500 font-medium">Problem #{problem.id}</span>
-        <button className="inline-flex items-center gap-1 px-3 py-1 text-sm font-semibold text-green-400 hover:bg-green-500/10 rounded-lg transition-all duration-300 group-hover:gap-2">
+        <button onClick={() => navigate(`/problems/${problem.id}`)} className="inline-flex items-center gap-1 px-3 py-1 text-sm font-semibold text-green-400 hover:bg-green-500/10 rounded-lg transition-all duration-300 group-hover:gap-2">
           Solve <ChevronRight className="w-4 h-4" />
         </button>
       </div>
