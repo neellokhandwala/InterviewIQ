@@ -4,6 +4,7 @@ import HomePage from './pages/HomePage';
 import ProblemsPage from './pages/ProblemsPage';
 import DashboardPage from './pages/DashboardPage';
 import ProblemDetailPage from './pages/ProblemDetailPage';
+import SessionPage from './pages/SessionPage';
 import { Toaster } from 'react-hot-toast';
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
         <Route path="/problems" element={isSignedIn ? <ProblemsPage /> : <Navigate to="/" />} />
         <Route path="/problems/:id" element={isSignedIn ? <ProblemDetailPage /> : <Navigate to="/" />} />
         <Route path="/dashboard" element={isSignedIn ? <DashboardPage /> : <Navigate to="/" />} />
+        <Route path="/session/:sessionId/:problemId" element={isSignedIn ? <SessionPage /> : <Navigate to="/" />} />
       </Routes>
       <Toaster toastOptions={{ duration: 3000 }} />
     </>
