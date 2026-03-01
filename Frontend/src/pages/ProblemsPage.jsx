@@ -148,9 +148,8 @@ const ProblemsPage = () => {
 
   const ProblemCard = ({ problem, isVisible }) => (
     <div
-      className={`group bg-slate-900/50 border border-slate-800 rounded-xl p-6 hover:border-blue-500/50 transition-all duration-500 transform ${
-        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-      } hover:shadow-xl hover:shadow-blue-500/10 hover:bg-slate-900/80`}
+      className={`group bg-slate-900/50 border border-slate-800 rounded-xl p-6 hover:border-blue-500/50 transition-all duration-500 transform ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+        } hover:shadow-xl hover:shadow-blue-500/10 hover:bg-slate-900/80`}
     >
       <div className="flex items-start justify-between gap-4 mb-3">
         <div className="flex items-start gap-3 flex-1">
@@ -298,7 +297,7 @@ const ProblemsPage = () => {
           <p className="text-xl text-slate-400 mb-8 max-w-2xl mx-auto">
             Start solving problems today and build the confidence you need for your next coding interview.
           </p>
-          <button className="px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold rounded-lg hover:shadow-lg hover:shadow-blue-500/50 transition-all duration-300 hover:scale-105">
+          <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold rounded-lg hover:shadow-lg hover:shadow-blue-500/50 transition-all duration-300 hover:scale-105">
             Start Solving Now
           </button>
         </div>
