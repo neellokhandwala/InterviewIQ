@@ -22,8 +22,8 @@ app.use(cors({ origin: ENV.CLIENT_URL, credentials: true }));
 app.use(clerkMiddleware())
 
 app.use("/api/inngest",serve({client:inngest, functions}));
-app.use("api/chat", chatRoutes)
-app.use("api/sessions", sessionRoutes)
+app.use("/api/chat", chatRoutes)
+app.use("/api/sessions", sessionRoutes)
 
 app.get("/", (req, res) => {
     res.status(200).send("InterviewIQ Backend API is Live!");

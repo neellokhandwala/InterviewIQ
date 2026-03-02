@@ -9,6 +9,7 @@ import {
 } from 'lucide-react'
 import { PROBLEMS_DATA } from '../data/problemsData'
 import toast from 'react-hot-toast'
+import axiosInstance from '../lib/axios'
 
 const DashboardPage = () => {
   const navigate = useNavigate()
@@ -21,84 +22,71 @@ const DashboardPage = () => {
   const [pastSessions, setPastSessions] = useState([])
   const [isCreating, setIsCreating] = useState(false)
   const [filterDifficulty, setFilterDifficulty] = useState('All')
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (!user?.id) return;
-
-    const savedActive = localStorage.getItem(`activeSessions_${user.id}`);
-    const savedPast   = localStorage.getItem(`pastSessions_${user.id}`);
-
-    if (savedActive) {
-      // dates get stringified, parse them back
-      const parsed = JSON.parse(savedActive);
-      setActiveSessions(parsed.map(s => ({ ...s, createdAt: new Date(s.createdAt) })));
-    } else {
-      // first time — load mock data
-      const mockActive = [
-        { id: 1, title: 'Two Sum', difficulty: 'Easy', participants: ['John Doe', 'Jane Smith'], currentParticipants: 2, maxParticipants: 2, videoParticipants: 2, status: 'live', createdAt: new Date(Date.now() - 5 * 60000) },
-        { id: 2, title: 'Valid Palindrome', difficulty: 'Easy', participants: ['Burak Orkimez'], currentParticipants: 1, maxParticipants: 2, videoParticipants: 1, status: 'live', createdAt: new Date(Date.now() - 15 * 60000) },
-      ];
-      setActiveSessions(mockActive);
-      localStorage.setItem(`activeSessions_${user.id}`, JSON.stringify(mockActive));
+    const fetchSessions = async () => {
+      try {
+        setLoading(true)
+        const [activRes, pastRes] = await Promise.all([
+          axiosInstance.get('/api/sessions/active'),
+          axiosInstance.get('/api/sessions/my-recent')
+        ])
+        
+        setActiveSessions(activRes.data.sessions || [])
+        setPastSessions(pastRes.data.sessions || [])
+      } catch (error) {
+        console.error('Error fetching sessions:', error)
+        toast.error('Failed to load sessions')
+      } finally {
+        setLoading(false)
+      }
     }
 
-    if (savedPast) {
-      const parsed = JSON.parse(savedPast);
-      setPastSessions(parsed.map(s => ({ ...s, endedAt: new Date(s.endedAt) })));
-    } else {
-      const mockPast = [
-        { id: 10, title: 'Reverse String',           difficulty: 'Easy',   duration: '23 mins', participants: 3, endedAt: new Date(Date.now() - 2 * 3600000) },
-        { id: 11, title: 'Valid Palindrome',          difficulty: 'Easy',   duration: '18 mins', participants: 2, endedAt: new Date(Date.now() - 4 * 3600000) },
-        { id: 12, title: 'Maximum Subarray',          difficulty: 'Medium', duration: '35 mins', participants: 2, endedAt: new Date(Date.now() - 24 * 3600000) },
-        { id: 13, title: 'Container With Most Water', difficulty: 'Medium', duration: '31 mins', participants: 2, endedAt: new Date(Date.now() - 48 * 3600000) },
-        { id: 14, title: 'Two Sum',                   difficulty: 'Easy',   duration: '20 mins', participants: 2, endedAt: new Date(Date.now() - 5 * 24 * 3600000) },
-      ];
-      setPastSessions(mockPast);
-      localStorage.setItem(`pastSessions_${user.id}`, JSON.stringify(mockPast));
+    if (user?.id) {
+      fetchSessions()
     }
   }, [user?.id])
 
-  const handleCreateSession = () => {
+  const handleCreateSession = async () => {
     if (!selectedProblem) { toast.error('Please select a problem'); return }
     setIsCreating(true)
-    setTimeout(() => {
-      const newSession = {
-        id: Date.now(),
-        title: selectedProblem.title,
-        difficulty: selectedProblem.difficulty,
-        problemId: selectedProblem.id,
-        participants: ['You'],
-        currentParticipants: 1,
-        maxParticipants: 2,
-        videoParticipants: 1,
-        status: 'live',
-        createdAt: new Date(),
-      }
-      const updated = [...activeSessions, newSession];
-      setActiveSessions(updated)
-      localStorage.setItem(`activeSessions_${user.id}`, JSON.stringify(updated))
+    try {
+      const response = await axiosInstance.post('/api/sessions', {
+        problem: selectedProblem.title,
+        difficulty: selectedProblem.difficulty.toLowerCase()
+      })
+      
+      const newSession = response.data.session
+      setActiveSessions([...activeSessions, newSession])
       setShowCreateModal(false)
       setSelectedProblem(null)
-      setIsCreating(false)
       toast.success(`Session created for ${selectedProblem.title}!`)
       // Navigate to the session
-      navigate(`/session/${newSession.id}/${newSession.problemId}`)
-    }, 800)
+      navigate(`/session/${newSession._id}`)
+    } catch (error) {
+      console.error('Error creating session:', error)
+      toast.error('Failed to create session')
+    } finally {
+      setIsCreating(false)
+    }
   }
 
-  const handleJoinSession = (sessionId) => {
-    const session = activeSessions.find(s => s.id === sessionId)
-    if (session?.currentParticipants < session?.maxParticipants) {
-      const updated = activeSessions.map(s =>
-        s.id === sessionId ? { ...s, currentParticipants: s.currentParticipants + 1 } : s
-      )
-      setActiveSessions(updated)
-      localStorage.setItem(`activeSessions_${user.id}`, JSON.stringify(updated))
-      toast.success(`Joined ${session.title}!`)
+  const handleJoinSession = async (sessionId) => {
+    try {
+      const response = await axiosInstance.post(`/api/sessions/${sessionId}/join`)
+      const session = response.data.session
+      setActiveSessions(activeSessions.map(s => s._id === sessionId ? session : s))
+      toast.success(`Joined ${session.problem}!`)
       // Navigate to the session
-      navigate(`/session/${session.id}/${session.problemId}`)
-    } else {
-      toast.error('Session is full')
+      navigate(`/session/${sessionId}`)
+    } catch (error) {
+      console.error('Error joining session:', error)
+      if (error.response?.status === 409) {
+        toast.error('Session is full')
+      } else {
+        toast.error('Failed to join session')
+      }
     }
   }
 
@@ -239,68 +227,71 @@ const DashboardPage = () => {
 
           {activeSessions.length > 0 ? (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {activeSessions.map((session) => (
-                <div key={session.id}
-                  className="group relative overflow-hidden rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-emerald-500/40 transition-all duration-300 hover:shadow-xl hover:shadow-emerald-500/10 backdrop-blur-sm">
-                  {/* left accent bar */}
-                  <div className="absolute left-0 top-4 bottom-4 w-0.5 bg-gradient-to-b from-emerald-500/0 via-emerald-500/60 to-emerald-500/0 rounded-full" />
+              {activeSessions.map((session) => {
+                const participantCount = session.participant ? 2 : 1
+                return (
+                  <div key={session._id}
+                    className="group relative overflow-hidden rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-emerald-500/40 transition-all duration-300 hover:shadow-xl hover:shadow-emerald-500/10 backdrop-blur-sm">
+                    {/* left accent bar */}
+                    <div className="absolute left-0 top-4 bottom-4 w-0.5 bg-gradient-to-b from-emerald-500/0 via-emerald-500/60 to-emerald-500/0 rounded-full" />
 
-                  <div className="p-5 pl-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-bold text-slate-100">{session.title}</h3>
-                          <span className="flex items-center gap-1 text-xs font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded-full">
-                            <span className="w-1 h-1 bg-emerald-400 rounded-full animate-pulse" />Live
+                    <div className="p-5 pl-6">
+                      <div className="flex items-start justify-between mb-4">
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-bold text-slate-100">{session.problem}</h3>
+                            <span className="flex items-center gap-1 text-xs font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded-full">
+                              <span className="w-1 h-1 bg-emerald-400 rounded-full animate-pulse" />Live
+                            </span>
+                          </div>
+                          <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${diffColor(session.difficulty)}`}>
+                            {session.difficulty.charAt(0).toUpperCase() + session.difficulty.slice(1)}
                           </span>
                         </div>
-                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${diffColor(session.difficulty)}`}>
-                          {session.difficulty}
-                        </span>
+                        <span className="text-xs text-slate-600">{formatTimeAgo(new Date(session.createdAt))}</span>
                       </div>
-                      <span className="text-xs text-slate-600">{formatTimeAgo(session.createdAt)}</span>
-                    </div>
 
-                    <div className="grid grid-cols-2 gap-3 mb-4">
-                      <div className="flex items-center gap-2 bg-slate-800/60 rounded-lg px-3 py-2">
-                        <Users className="w-3.5 h-3.5 text-emerald-400" />
-                        <span className="text-xs text-slate-300 font-medium">
-                          {session.currentParticipants}/{session.maxParticipants} joined
-                        </span>
+                      <div className="grid grid-cols-2 gap-3 mb-4">
+                        <div className="flex items-center gap-2 bg-slate-800/60 rounded-lg px-3 py-2">
+                          <Users className="w-3.5 h-3.5 text-emerald-400" />
+                          <span className="text-xs text-slate-300 font-medium">
+                            {participantCount}/2 joined
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 bg-slate-800/60 rounded-lg px-3 py-2">
+                          <Video className="w-3.5 h-3.5 text-violet-400" />
+                          <span className="text-xs text-slate-300 font-medium">
+                            {participantCount}/2 on video
+                          </span>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2 bg-slate-800/60 rounded-lg px-3 py-2">
-                        <Video className="w-3.5 h-3.5 text-violet-400" />
-                        <span className="text-xs text-slate-300 font-medium">
-                          {session.videoParticipants}/{session.maxParticipants} on video
-                        </span>
-                      </div>
-                    </div>
 
-                    {/* Capacity bar */}
-                    <div className="mb-4">
-                      <div className="h-1 bg-slate-800 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-500"
-                          style={{ width: `${(session.currentParticipants / session.maxParticipants) * 100}%` }}
-                        />
+                      {/* Capacity bar */}
+                      <div className="mb-4">
+                        <div className="h-1 bg-slate-800 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-500"
+                            style={{ width: `${(participantCount / 2) * 100}%` }}
+                          />
+                        </div>
                       </div>
-                    </div>
 
-                    <button
-                      onClick={() => handleJoinSession(session.id)}
-                      disabled={session.currentParticipants >= session.maxParticipants}
-                      className={`w-full py-2 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all duration-300 ${
-                        session.currentParticipants >= session.maxParticipants
-                          ? 'bg-slate-800/50 text-slate-500 cursor-not-allowed'
-                          : 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:shadow-lg hover:shadow-emerald-500/30 hover:scale-[1.02] active:scale-95'
-                      }`}
-                    >
-                      <PlayCircle className="w-4 h-4" />
-                      {session.currentParticipants >= session.maxParticipants ? 'Session Full' : 'Join Now'}
-                    </button>
+                      <button
+                        onClick={() => handleJoinSession(session._id)}
+                        disabled={participantCount >= 2}
+                        className={`w-full py-2 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all duration-300 ${
+                          participantCount >= 2
+                            ? 'bg-slate-800/50 text-slate-500 cursor-not-allowed'
+                            : 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:shadow-lg hover:shadow-emerald-500/30 hover:scale-[1.02] active:scale-95'
+                        }`}
+                      >
+                        <PlayCircle className="w-4 h-4" />
+                        {participantCount >= 2 ? 'Session Full' : 'Join Now'}
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           ) : (
             <div className="rounded-2xl bg-slate-900/40 border border-slate-800 border-dashed p-12 text-center">
@@ -330,34 +321,36 @@ const DashboardPage = () => {
           {pastSessions.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {pastSessions.map((session) => (
-                <div key={session.id}
+                <div key={session._id}
                   className="group relative overflow-hidden rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-slate-700 transition-all duration-300 hover:shadow-xl hover:shadow-black/30 backdrop-blur-sm">
                   <div className="absolute left-0 top-4 bottom-4 w-0.5 bg-gradient-to-b from-blue-500/0 via-blue-500/40 to-blue-500/0 rounded-full" />
 
                   <div className="p-5 pl-6">
                     <div className="mb-3">
-                      <h3 className="font-bold text-slate-100 mb-2 group-hover:text-blue-300 transition-colors">{session.title}</h3>
+                      <h3 className="font-bold text-slate-100 mb-2 group-hover:text-blue-300 transition-colors">{session.problem}</h3>
                       <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${diffColor(session.difficulty)}`}>
-                        {session.difficulty}
+                        {session.difficulty.charAt(0).toUpperCase() + session.difficulty.slice(1)}
                       </span>
                     </div>
 
                     <div className="space-y-2 mb-4">
                       <div className="flex items-center gap-2 text-xs text-slate-400">
                         <Clock className="w-3.5 h-3.5 text-blue-400" />
-                        {session.duration}
+                        Completed
                       </div>
                       <div className="flex items-center gap-2 text-xs text-slate-400">
                         <Users className="w-3.5 h-3.5 text-blue-400" />
-                        {session.participants} participant{session.participants !== 1 ? 's' : ''}
+                        {session.participant ? '2' : '1'} participant{(session.participant ? 2 : 1) !== 1 ? 's' : ''}
                       </div>
                       <div className="flex items-center gap-2 text-xs text-slate-600">
                         <Calendar className="w-3.5 h-3.5" />
-                        {formatTimeAgo(session.endedAt)}
+                        {formatTimeAgo(new Date(session.updatedAt))}
                       </div>
                     </div>
 
-                    <button className="w-full py-2 rounded-xl text-xs font-semibold text-slate-400 bg-slate-800/60 hover:bg-slate-800 hover:text-slate-200 transition-all duration-200 flex items-center justify-center gap-1.5">
+                    <button 
+                      onClick={() => navigate(`/session/${session._id}`)}
+                      className="w-full py-2 rounded-xl text-xs font-semibold text-slate-400 bg-slate-800/60 hover:bg-slate-800 hover:text-slate-200 transition-all duration-200 flex items-center justify-center gap-1.5">
                       <Code2 className="w-3.5 h-3.5" /> View Details
                     </button>
                   </div>
