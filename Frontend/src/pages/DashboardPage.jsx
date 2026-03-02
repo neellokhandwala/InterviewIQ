@@ -33,10 +33,14 @@ const DashboardPage = () => {
           axiosInstance.get('/api/sessions/my-recent')
         ])
         
-        setActiveSessions(activRes.data.sessions || [])
-        setPastSessions(pastRes.data.sessions || [])
+        console.log("[v0] Active sessions response:", activRes.data)
+        console.log("[v0] Past sessions response:", pastRes.data)
+        
+        setActiveSessions(Array.isArray(activRes.data.sessions) ? activRes.data.sessions : [])
+        setPastSessions(Array.isArray(pastRes.data.sessions) ? pastRes.data.sessions : [])
       } catch (error) {
         console.error('Error fetching sessions:', error)
+        console.log("[v0] Error response:", error.response?.data)
         toast.error('Failed to load sessions')
       } finally {
         setLoading(false)
@@ -57,7 +61,12 @@ const DashboardPage = () => {
         difficulty: selectedProblem.difficulty.toLowerCase()
       })
       
+      console.log("[v0] Create session response:", response.data)
       const newSession = response.data.session
+      if (!newSession || !newSession._id) {
+        toast.error('Invalid session response from server')
+        return
+      }
       setActiveSessions([...activeSessions, newSession])
       setShowCreateModal(false)
       setSelectedProblem(null)
@@ -66,6 +75,7 @@ const DashboardPage = () => {
       navigate(`/session/${newSession._id}`)
     } catch (error) {
       console.error('Error creating session:', error)
+      console.log("[v0] Create session error response:", error.response?.data)
       toast.error('Failed to create session')
     } finally {
       setIsCreating(false)
@@ -74,14 +84,21 @@ const DashboardPage = () => {
 
   const handleJoinSession = async (sessionId) => {
     try {
+      console.log("[v0] Attempting to join session:", sessionId)
       const response = await axiosInstance.post(`/api/sessions/${sessionId}/join`)
+      console.log("[v0] Join session response:", response.data)
       const session = response.data.session
+      if (!session) {
+        toast.error('Invalid session response from server')
+        return
+      }
       setActiveSessions(activeSessions.map(s => s._id === sessionId ? session : s))
       toast.success(`Joined ${session.problem}!`)
       // Navigate to the session
       navigate(`/session/${sessionId}`)
     } catch (error) {
       console.error('Error joining session:', error)
+      console.log("[v0] Join session error response:", error.response?.data)
       if (error.response?.status === 409) {
         toast.error('Session is full')
       } else {

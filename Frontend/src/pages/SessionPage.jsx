@@ -167,19 +167,21 @@ export default function SessionPage() {
   useEffect(() => {
     if (!tokenData || !sessionData || !user) return;
 
-    const { token, userId } = tokenData;
+    const { token, videoToken, userId } = tokenData;
     const callId = sessionData.callId;
+
+    console.log("[v0] Initializing Stream with tokens - userId:", userId, "callId:", callId);
 
     // --- Video ---
     const vc = new StreamVideoClient({
       apiKey: STREAM_API_KEY,
       user:   { id: userId, name: user.fullName || user.username },
-      token,
+      token: videoToken || token,
     });
 
     const c = vc.call('default', callId);
-    c.join({ create: false }).catch((err) =>
-      console.error('Failed to join call:', err)
+    c.join({ create: true }).catch((err) =>
+      console.error('[v0] Failed to join call:', err)
     );
 
     setVideoClient(vc);
@@ -189,6 +191,7 @@ export default function SessionPage() {
     const cc = StreamChat.getInstance(STREAM_API_KEY);
     cc.connectUser({ id: userId, name: user.fullName || user.username }, token)
       .then(() => {
+        console.log("[v0] Connected to Stream Chat");
         const ch = cc.channel('messaging', callId);
         return ch.watch();
       })
@@ -196,8 +199,9 @@ export default function SessionPage() {
         // ch is the channel instance after watch()
         const channel = cc.channel('messaging', callId);
         setChatChannel(channel);
+        console.log("[v0] Connected to chat channel:", callId);
       })
-      .catch((err) => console.error('Stream Chat error:', err));
+      .catch((err) => console.error('[v0] Stream Chat error:', err));
 
     setChatClient(cc);
     setStreamToken(token);
@@ -254,10 +258,14 @@ export default function SessionPage() {
 
   const handleEndSession = async () => {
     try {
-      await axiosInstance.post(`/api/sessions/${sessionId}/end`);
+      console.log("[v0] Ending session:", sessionId);
+      const response = await axiosInstance.post(`/api/sessions/${sessionId}/end`);
+      console.log("[v0] Session ended response:", response.data);
       toast.success('Session ended');
       navigate('/dashboard');
-    } catch {
+    } catch (error) {
+      console.error("[v0] Error ending session:", error);
+      console.log("[v0] End session error response:", error.response?.data);
       toast.error('Failed to end session');
     }
   };
