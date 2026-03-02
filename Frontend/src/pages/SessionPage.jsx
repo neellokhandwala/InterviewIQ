@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import { useUser } from '@clerk/clerk-react';
 import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
+import axiosInstance from '../lib/axios';
 
 // Stream Video
 import {
@@ -133,7 +133,7 @@ export default function SessionPage() {
   const { data: sessionData, isLoading: sessionLoading, error: sessionError } = useQuery({
     queryKey: ['session', sessionId],
     queryFn: async () => {
-      const { data } = await axios.get(`/api/sessions/${sessionId}`);
+      const { data } = await axiosInstance.get(`/api/sessions/${sessionId}`);
       return data.session;
     },
     enabled: !!sessionId,
@@ -143,7 +143,7 @@ export default function SessionPage() {
   const { data: tokenData } = useQuery({
     queryKey: ['stream-token'],
     queryFn: async () => {
-      const { data } = await axios.get('/api/stream/token');
+      const { data } = await axiosInstance.get('/api/chat/token');
       return data; // expects { token, userId }
     },
     enabled: !!user,
@@ -254,7 +254,7 @@ export default function SessionPage() {
 
   const handleEndSession = async () => {
     try {
-      await axios.post(`/api/sessions/${sessionId}/end`);
+      await axiosInstance.post(`/api/sessions/${sessionId}/end`);
       toast.success('Session ended');
       navigate('/dashboard');
     } catch {
