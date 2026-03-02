@@ -29,8 +29,8 @@ const DashboardPage = () => {
       try {
         setLoading(true)
         const [activRes, pastRes] = await Promise.all([
-          axiosInstance.get('/api/sessions/active'),
-          axiosInstance.get('/api/sessions/my-recent')
+          axiosInstance.get('/sessions/active'),
+          axiosInstance.get('/sessions/my-recent')
         ])
         
         console.log("[v0] Active sessions response:", activRes.data)
@@ -56,7 +56,7 @@ const DashboardPage = () => {
     if (!selectedProblem) { toast.error('Please select a problem'); return }
     setIsCreating(true)
     try {
-      const response = await axiosInstance.post('/api/sessions', {
+      const response = await axiosInstance.post('/sessions', {
         problem: selectedProblem.title,
         difficulty: selectedProblem.difficulty.toLowerCase()
       })
@@ -82,29 +82,8 @@ const DashboardPage = () => {
     }
   }
 
-  const handleJoinSession = async (sessionId) => {
-    try {
-      console.log("[v0] Attempting to join session:", sessionId)
-      const response = await axiosInstance.post(`/api/sessions/${sessionId}/join`)
-      console.log("[v0] Join session response:", response.data)
-      const session = response.data.session
-      if (!session) {
-        toast.error('Invalid session response from server')
-        return
-      }
-      setActiveSessions(activeSessions.map(s => s._id === sessionId ? session : s))
-      toast.success(`Joined ${session.problem}!`)
-      // Navigate to the session
-      navigate(`/session/${sessionId}`)
-    } catch (error) {
-      console.error('Error joining session:', error)
-      console.log("[v0] Join session error response:", error.response?.data)
-      if (error.response?.status === 409) {
-        toast.error('Session is full')
-      } else {
-        toast.error('Failed to join session')
-      }
-    }
+  const handleJoinSession = (sessionId) => {
+    navigate(`/session/${sessionId}`)
   }
 
   const formatTimeAgo = (date) => {
@@ -118,10 +97,10 @@ const DashboardPage = () => {
   }
 
   const diffColor = (d) => ({
-    Easy:   'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
-    Medium: 'bg-amber-500/15  text-amber-400  border-amber-500/30',
-    Hard:   'bg-red-500/15    text-red-400    border-red-500/30',
-  }[d] ?? 'bg-slate-500/15 text-slate-400 border-slate-500/30')
+    easy:   'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
+    medium: 'bg-amber-500/15  text-amber-400  border-amber-500/30',
+    hard:   'bg-red-500/15    text-red-400    border-red-500/30',
+  }[d?.toLowerCase()] ?? 'bg-slate-500/15 text-slate-400 border-slate-500/30')
 
   const problemsList = Object.values(PROBLEMS_DATA)
   const filtered = filterDifficulty === 'All'
@@ -150,8 +129,8 @@ const DashboardPage = () => {
     },
     {
       icon: TrendingUp,
-      value: activeSessions.reduce((s, a) => s + a.videoParticipants, 0),
-      label: 'Video Participants',
+      value: activeSessions.filter(s => !s.participant).length,
+      label: 'Open Sessions',
       badge: 'Real-time',
       badgeColor: 'text-violet-400 bg-violet-500/10 border-violet-500/20',
       iconColor: 'text-violet-400',

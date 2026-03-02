@@ -133,7 +133,7 @@ export default function SessionPage() {
   const { data: sessionData, isLoading: sessionLoading, error: sessionError } = useQuery({
     queryKey: ['session', sessionId],
     queryFn: async () => {
-      const { data } = await axiosInstance.get(`/api/sessions/${sessionId}`);
+      const { data } = await axiosInstance.get(`/sessions/${sessionId}`);
       return data.session;
     },
     enabled: !!sessionId,
@@ -143,7 +143,7 @@ export default function SessionPage() {
   const { data: tokenData } = useQuery({
     queryKey: ['stream-token'],
     queryFn: async () => {
-      const { data } = await axiosInstance.get('/api/chat/token');
+      const { data } = await axiosInstance.get('/chat/token');
       return data; // expects { token, userId }
     },
     enabled: !!user,
@@ -259,7 +259,7 @@ export default function SessionPage() {
   const handleEndSession = async () => {
     try {
       console.log("[v0] Ending session:", sessionId);
-      const response = await axiosInstance.post(`/api/sessions/${sessionId}/end`);
+      const response = await axiosInstance.post(`/sessions/${sessionId}/end`);
       console.log("[v0] Session ended response:", response.data);
       toast.success('Session ended');
       navigate('/dashboard');
