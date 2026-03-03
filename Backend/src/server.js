@@ -19,7 +19,10 @@ const app = express();
 app.use(express.json());
 //credentials: true allows cookies to be sent in cross-origin requests
 app.use(cors({
-  origin: ['https://interview-iq-gamma.vercel.app'],
+  origin: [
+    'https://interview-iq-gamma.vercel.app',
+    'http://localhost:5173'
+  ],
   credentials: true
 }));
 app.use(clerkMiddleware())
