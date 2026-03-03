@@ -6,9 +6,16 @@ import DashboardPage from './pages/DashboardPage'
 import ProblemDetailPage from './pages/ProblemDetailPage'
 import SessionPage from './pages/SessionPage'
 import { Toaster } from 'react-hot-toast'
+import { setupAxiosInterceptor } from './lib/setupAxios'
+import { useAuth } from '@clerk/clerk-react'
+
 
 function App() {
   const { isSignedIn, isLoaded } = useUser()
+  const { getToken } = useAuth()
+  useEffect(() => {
+    setupAxiosInterceptor(getToken)
+  }, [getToken])
 
   if (!isLoaded) return (
     <div className="min-h-screen bg-slate-950 flex items-center justify-center">
