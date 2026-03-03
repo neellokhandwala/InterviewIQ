@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'  // ← add this
 import { useUser } from '@clerk/clerk-react'
 import { Route, Routes, Navigate } from 'react-router'
 import HomePage from './pages/HomePage'
@@ -9,10 +10,10 @@ import { Toaster } from 'react-hot-toast'
 import { setupAxiosInterceptor } from './lib/setupAxios'
 import { useAuth } from '@clerk/clerk-react'
 
-
 function App() {
   const { isSignedIn, isLoaded } = useUser()
   const { getToken } = useAuth()
+
   useEffect(() => {
     setupAxiosInterceptor(getToken)
   }, [getToken])
