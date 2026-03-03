@@ -18,16 +18,9 @@ const app = express();
 //middleware
 app.use(express.json());
 //credentials: true allows cookies to be sent in cross-origin requests
-app.use(cors({ 
-  origin: (origin, callback) => {
-    const allowed = ENV.CLIENT_URL?.replace(/\/$/, ''); // strip trailing slash
-    if (!origin || origin === allowed) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true 
+app.use(cors({
+  origin: ['https://interview-iq-gamma.vercel.app'],
+  credentials: true
 }));
 app.use(clerkMiddleware())
 
