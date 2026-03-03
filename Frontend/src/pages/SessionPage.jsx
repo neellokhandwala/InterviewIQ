@@ -5,9 +5,8 @@ import Editor from '@monaco-editor/react';
 import {
   Play, Copy, Check, AlertCircle, Clock,
   ChevronRight, BookOpen, TestTube,
-  Terminal, CheckCircle, XCircle, Code2,
-  Users, Mic, MicOff, Video, VideoOff,
-  Phone, Home, LogOut
+  Terminal, CheckCircle, XCircle,
+  Users, Phone, Home, LogOut,
 } from 'lucide-react';
 import { useUser } from '@clerk/clerk-react';
 import { useQuery } from '@tanstack/react-query';
@@ -43,7 +42,7 @@ import { executeCode } from '../lib/piston';
 import toast from 'react-hot-toast';
 import confetti from 'canvas-confetti';
 
-// ─── Constants ──────────────────────────────────────────────────
+// ─── Constants ───────────────────────────────────────────────────
 const STREAM_API_KEY = import.meta.env.VITE_STREAM_API_KEY;
 
 const languages = [
@@ -61,11 +60,11 @@ const getDifficultyColor = (d) => ({
 const normalize = (str) =>
   str.trim().replace(/\r\n/g, '\n').replace(/\s+$/gm, '').toLowerCase();
 
-// ─── Stream Video inner component (must be inside StreamCall) ────
+// ─── VideoCallUI (must live inside <StreamCall>) ──────────────────
 function VideoCallUI({ onLeave }) {
   const { useCallCallingState, useParticipantCount } = useCallStateHooks();
-  const callingState  = useCallCallingState();
-  const count         = useParticipantCount();
+  const callingState = useCallCallingState();
+  const count        = useParticipantCount();
 
   if (callingState === CallingState.LEFT) {
     return (
@@ -78,27 +77,20 @@ function VideoCallUI({ onLeave }) {
   return (
     <StreamTheme>
       <div className="h-full flex flex-col bg-slate-900">
-        {/* header */}
         <div className="flex items-center justify-between px-4 py-2 bg-slate-950/80 border-b border-slate-800 shrink-0">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
             <span className="text-xs font-semibold text-slate-300">Live Video</span>
             <span className="text-xs text-slate-600">• {count} participant{count !== 1 ? 's' : ''}</span>
           </div>
-          <button
-            onClick={onLeave}
-            className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 text-xs font-medium transition-all"
-          >
+          <button onClick={onLeave}
+            className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 text-xs font-medium transition-all">
             <Phone className="w-3 h-3" /> Leave
           </button>
         </div>
-
-        {/* video layout */}
         <div className="flex-1 overflow-hidden">
           <SpeakerLayout participantsBarPosition="bottom" />
         </div>
-
-        {/* controls */}
         <div className="shrink-0 flex justify-center py-2 bg-slate-950/80 border-t border-slate-800">
           <CallControls onLeave={onLeave} />
         </div>
@@ -107,18 +99,23 @@ function VideoCallUI({ onLeave }) {
   );
 }
 
-// ─── Main page ───────────────────────────────────────────────────
+// ─── Main page ────────────────────────────────────────────────────
 export default function SessionPage() {
   const { sessionId } = useParams();
   const navigate      = useNavigate();
   const { user }      = useUser();
 
-  // Stream clients
-  const [videoClient,   setVideoClient]   = useState(null);
-  const [call,          setCall]          = useState(null);
-  const [chatClient,    setChatClient]    = useState(null);
-  const [chatChannel,   setChatChannel]   = useState(null);
-  const [streamToken,   setStreamToken]   = useState(null);
+  // Refs — never trigger re-renders, safe to use in cleanup
+  const codeRef    = useRef('');
+  const vcRef      = useRef(null);   // StreamVideoClient
+  const callRef    = useRef(null);   // Call
+  const ccRef      = useRef(null);   // StreamChat
+
+  // Stream UI state
+  const [videoClient,  setVideoClient]  = useState(null);
+  const [call,         setCall]         = useState(null);
+  const [chatClient,   setChatClient]   = useState(null);
+  const [chatChannel,  setChatChannel]  = useState(null);
 
   // Editor state
   const [selectedLanguage, setSelectedLanguage] = useState('javascript');
@@ -127,9 +124,9 @@ export default function SessionPage() {
   const [isRunning,        setIsRunning]         = useState(false);
   const [copied,           setCopied]           = useState(false);
   const [activeTab,        setActiveTab]         = useState('description');
-  const [mobileView,       setMobileView]        = useState('problem'); // 'problem' | 'editor'
+  const [mobileView,       setMobileView]        = useState('problem');
 
-  // ── Fetch session from backend ──────────────────────────────
+  // ── Fetch session ────────────────────────────────────────────
   const { data: sessionData, isLoading: sessionLoading, error: sessionError } = useQuery({
     queryKey: ['session', sessionId],
     queryFn: async () => {
@@ -139,92 +136,119 @@ export default function SessionPage() {
     enabled: !!sessionId,
   });
 
-  // ── Fetch Stream token from backend ─────────────────────────
+  // ── Fetch Stream token ───────────────────────────────────────
   const { data: tokenData } = useQuery({
     queryKey: ['stream-token'],
     queryFn: async () => {
       const { data } = await axiosInstance.get('/chat/token');
-      return data; // expects { token, userId }
+      return data;
     },
     enabled: !!user,
   });
 
-  // ── Derive problem from session ─────────────────────────────
+  // ── Derive problem ───────────────────────────────────────────
   const problem = sessionData
-    ? Object.values(PROBLEMS_DATA).find(
-        (p) => p.title === sessionData.problem
-      ) || PROBLEMS_DATA[1]
+    ? Object.values(PROBLEMS_DATA).find(p => p.title === sessionData.problem) || PROBLEMS_DATA[1]
     : PROBLEMS_DATA[1];
 
-  // ── Initialize code from localStorage ──────────────────────
+  // ── Load code from localStorage ──────────────────────────────
   useEffect(() => {
-    const saved = localStorage.getItem(`code_${problem.id}_${selectedLanguage}`);
-    setCode(saved || problem.starterCode?.[selectedLanguage] || '');
+    const saved   = localStorage.getItem(`code_${problem.id}_${selectedLanguage}`);
+    const initial = saved || problem.starterCode?.[selectedLanguage] || '';
+    setCode(initial);
+    codeRef.current = initial;
     setOutput(null);
   }, [problem.id, selectedLanguage]);
 
-  // ── Initialize Stream Video + Chat once token + session ready
+  // ── Initialize Stream Video + Chat ───────────────────────────
   useEffect(() => {
     if (!tokenData || !sessionData || !user) return;
 
     const { token, videoToken, userId } = tokenData;
-    const callId = sessionData.callId;
+    const callId  = sessionData.callId;
+    // Guarantee name is always a non-empty string (fixes "user_details" WS error)
+    const userName = user.fullName || user.username || userId;
 
-    console.log("[v0] Initializing Stream with tokens - userId:", userId, "callId:", callId);
-
-    // --- Video ---
-    const vc = new StreamVideoClient({
+    // ── Video ── use getOrCreateInstance to avoid duplicate-client warning
+    const vc = StreamVideoClient.getOrCreateInstance({
       apiKey: STREAM_API_KEY,
-      user:   { id: userId, name: user.fullName || user.username },
-      token: videoToken || token,
+      user:   { id: userId, name: userName },
+      token:  videoToken || token,
     });
-
     const c = vc.call('default', callId);
-    c.join({ create: true }).catch((err) =>
-      console.error('[v0] Failed to join call:', err)
-    );
+    c.join({ create: true }).catch(err => console.error('[stream] join failed:', err));
 
+    vcRef.current  = vc;
+    callRef.current = c;
     setVideoClient(vc);
     setCall(c);
 
-    // --- Chat ---
+    // ── Chat ── async IIFE keeps cleanup synchronous
     const cc = StreamChat.getInstance(STREAM_API_KEY);
-    cc.connectUser({ id: userId, name: user.fullName || user.username }, token)
-      .then(() => {
-        console.log("[v0] Connected to Stream Chat");
+    ccRef.current = cc;
+
+    (async () => {
+      try {
+        // If a previous session left the singleton connected, disconnect first
+        if (cc.userID) {
+          await cc.disconnectUser();
+        }
+        await cc.connectUser({ id: userId, name: userName }, token);
+        console.log('[stream] chat connected');
         const ch = cc.channel('messaging', callId);
-        return ch.watch();
-      })
-      .then((ch) => {
-        // ch is the channel instance after watch()
-        const channel = cc.channel('messaging', callId);
-        setChatChannel(channel);
-        console.log("[v0] Connected to chat channel:", callId);
-      })
-      .catch((err) => console.error('[v0] Stream Chat error:', err));
+        await ch.watch();
+        // Only update state if still on this page
+        setChatClient(cc);
+        setChatChannel(ch);
+        console.log('[stream] channel ready:', callId);
+      } catch (err) {
+        console.error('[stream] chat error:', err);
+      }
+    })();
 
-    setChatClient(cc);
-    setStreamToken(token);
-
+    // ── Cleanup ─────────────────────────────────────────────────
+    // IMPORTANT: null the React state first (removes Stream components from DOM),
+    // then disconnect on the next animation frame — this prevents the crash
+    // "can't use a channel after client.disconnect()" caused by React still
+    // rendering ChannelInner children when disconnect is called synchronously.
     return () => {
-      c.leave().catch(console.error);
-      vc.disconnectUser();
-      cc.disconnectUser();
+      setChatChannel(null);
+      setChatClient(null);
+      setCall(null);
+      setVideoClient(null);
+
+      requestAnimationFrame(() => {
+        callRef.current?.leave().catch(console.error);
+        vcRef.current?.disconnectUser().catch(console.error);
+        ccRef.current?.disconnectUser().catch(console.error);
+        callRef.current  = null;
+        vcRef.current    = null;
+        ccRef.current    = null;
+      });
     };
   }, [tokenData, sessionData, user]);
 
-  // ── Handlers ────────────────────────────────────────────────
-  const handleLanguageChange = (langId) => {
-    setSelectedLanguage(langId);
-  };
+  // ── Full-session guard ───────────────────────────────────────
+  useEffect(() => {
+    if (!sessionData || !user) return;
+    const isHost        = sessionData.host?.clerkId === user.id;
+    const isParticipant = sessionData.participant?.clerkId === user.id;
+    if (sessionData.participant && !isHost && !isParticipant) {
+      toast.error('This session is full (2/2)');
+      navigate('/dashboard');
+    }
+  }, [sessionData, user]);
+
+  // ── Handlers ─────────────────────────────────────────────────
+  const handleLanguageChange = (langId) => setSelectedLanguage(langId);
 
   const handleRunCode = async () => {
     setIsRunning(true);
     setOutput(null);
     try {
-      let codeToRun = code;
+      let codeToRun = codeRef.current || code;
       if (selectedLanguage !== 'java' && problem.testRunner?.[selectedLanguage]) {
-        codeToRun = code + '\n' + problem.testRunner[selectedLanguage];
+        codeToRun = codeRef.current + '\n' + problem.testRunner[selectedLanguage];
       }
       const result = await executeCode(selectedLanguage, codeToRun);
       if (result.success) {
@@ -233,7 +257,7 @@ export default function SessionPage() {
         if (passed) {
           confetti({ particleCount: 100, spread: 220, origin: { x: 0.5, y: 0.6 } });
           toast.success('All tests passed! 🎉');
-          setOutput({ success: true, text: `${result.output.trim()}\n\n✓ All tests passed!` });
+          setOutput({ success: true,  text: `${result.output.trim()}\n\n✓ All tests passed!` });
         } else {
           toast.error('Wrong answer.');
           setOutput({ success: false, text: `Your Output:\n${result.output.trim()}\n\nExpected:\n${expected}` });
@@ -251,27 +275,23 @@ export default function SessionPage() {
   };
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(code);
+    navigator.clipboard.writeText(codeRef.current || code);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
   const handleEndSession = async () => {
     try {
-      console.log("[v0] Ending session:", sessionId);
-      const response = await axiosInstance.post(`/sessions/${sessionId}/end`);
-      console.log("[v0] Session ended response:", response.data);
+      await axiosInstance.post(`/sessions/${sessionId}/end`);
       toast.success('Session ended');
       navigate('/dashboard');
-    } catch (error) {
-      console.error("[v0] Error ending session:", error);
-      console.log("[v0] End session error response:", error.response?.data);
+    } catch {
       toast.error('Failed to end session');
     }
   };
 
   const handleLeaveCall = () => {
-    call?.leave();
+    callRef.current?.leave().catch(console.error);
     navigate('/dashboard');
   };
 
@@ -283,35 +303,30 @@ export default function SessionPage() {
     { id: 'constraints', label: 'Constraints', icon: AlertCircle },
   ];
 
-  // ── Loading / error states ───────────────────────────────────
-  if (sessionLoading) {
-    return (
-      <div className="h-screen bg-slate-950 flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-slate-400 text-sm">Loading session...</p>
-        </div>
+  // ── Loading / error ──────────────────────────────────────────
+  if (sessionLoading) return (
+    <div className="h-screen bg-slate-950 flex items-center justify-center">
+      <div className="flex flex-col items-center gap-3">
+        <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+        <p className="text-slate-400 text-sm">Loading session...</p>
       </div>
-    );
-  }
+    </div>
+  );
 
-  if (sessionError) {
-    return (
-      <div className="h-screen bg-slate-950 flex items-center justify-center">
-        <div className="text-center space-y-3">
-          <p className="text-red-400">Failed to load session.</p>
-          <button onClick={() => navigate('/dashboard')} className="text-blue-400 hover:underline text-sm">
-            ← Back to Dashboard
-          </button>
-        </div>
+  if (sessionError) return (
+    <div className="h-screen bg-slate-950 flex items-center justify-center">
+      <div className="text-center space-y-3">
+        <p className="text-red-400">Failed to load session.</p>
+        <button onClick={() => navigate('/dashboard')} className="text-blue-400 hover:underline text-sm">
+          ← Back to Dashboard
+        </button>
       </div>
-    );
-  }
+    </div>
+  );
 
-  // ── Shared sub-components ────────────────────────────────────
+  // ── Sub-panels ───────────────────────────────────────────────
   const ProblemPanel = () => (
     <div className="h-full flex flex-col border-r border-slate-800 bg-slate-950 overflow-hidden">
-      {/* header */}
       <div className="px-5 pt-4 pb-3 border-b border-slate-800 space-y-2 shrink-0">
         <div className="flex items-center gap-2 text-xs text-slate-500">
           <button onClick={() => navigate('/dashboard')}
@@ -335,21 +350,17 @@ export default function SessionPage() {
         </div>
       </div>
 
-      {/* tabs */}
       <div className="flex border-b border-slate-800 px-3 shrink-0 overflow-x-auto">
         {tabs.map(({ id: tabId, label, icon: Icon }) => (
           <button key={tabId} onClick={() => setActiveTab(tabId)}
             className={`flex items-center gap-1.5 px-3 py-2.5 text-xs font-medium border-b-2 transition-all whitespace-nowrap ${
-              activeTab === tabId
-                ? 'border-blue-500 text-blue-400'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
+              activeTab === tabId ? 'border-blue-500 text-blue-400' : 'border-transparent text-slate-400 hover:text-slate-200'
             }`}>
             <Icon className="w-3.5 h-3.5" />{label}
           </button>
         ))}
       </div>
 
-      {/* content */}
       <div className="flex-1 overflow-y-auto p-5 space-y-4">
         {activeTab === 'description' && (
           <p className="text-slate-300 leading-relaxed text-sm">{problem.description}</p>
@@ -362,14 +373,8 @@ export default function SessionPage() {
                   Example {i + 1}
                 </div>
                 <div className="p-4 space-y-2 font-mono text-xs">
-                  <div className="flex gap-2">
-                    <span className="text-blue-400 font-bold w-16 shrink-0">Input:</span>
-                    <span className="text-slate-300">{ex.input}</span>
-                  </div>
-                  <div className="flex gap-2">
-                    <span className="text-green-400 font-bold w-16 shrink-0">Output:</span>
-                    <span className="text-slate-300">{ex.output}</span>
-                  </div>
+                  <div className="flex gap-2"><span className="text-blue-400 font-bold w-16 shrink-0">Input:</span><span className="text-slate-300">{ex.input}</span></div>
+                  <div className="flex gap-2"><span className="text-green-400 font-bold w-16 shrink-0">Output:</span><span className="text-slate-300">{ex.output}</span></div>
                   {ex.explanation && (
                     <div className="flex gap-2 pt-2 border-t border-slate-800">
                       <span className="text-slate-500 font-bold w-16 shrink-0">Explain:</span>
@@ -399,7 +404,7 @@ export default function SessionPage() {
     <div className="h-full flex flex-col bg-slate-900">
       <div className="flex items-center justify-between px-4 py-2.5 bg-slate-950/80 border-b border-slate-800 shrink-0">
         <div className="flex gap-1.5">
-          {languages.map((lang) => (
+          {languages.map(lang => (
             <button key={lang.id} onClick={() => handleLanguageChange(lang.id)}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                 selectedLanguage === lang.id
@@ -428,13 +433,13 @@ export default function SessionPage() {
       </div>
       <div className="flex-1 overflow-hidden">
         <Editor
+          key={`${problem.id}_${selectedLanguage}`}
           height="100%"
-          language={languages.find((l) => l.id === selectedLanguage)?.monacoLang}
-          value={code}
-          onChange={(val) => {
-            const v = val || '';
-            setCode(v);
-            localStorage.setItem(`code_${problem.id}_${selectedLanguage}`, v);
+          language={languages.find(l => l.id === selectedLanguage)?.monacoLang}
+          defaultValue={code}
+          onChange={val => {
+            codeRef.current = val || '';
+            localStorage.setItem(`code_${problem.id}_${selectedLanguage}`, val || '');
           }}
           theme="vs-dark"
           options={{
@@ -457,34 +462,63 @@ export default function SessionPage() {
           <span className={`ml-auto flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border font-medium ${
             output.success
               ? 'bg-green-500/10 text-green-400 border-green-500/30'
-              : 'bg-red-500/10 text-red-400 border-red-500/30'
+              : 'bg-red-500/10   text-red-400   border-red-500/30'
           }`}>
             {output.success
               ? <><CheckCircle className="w-3 h-3" />All Passed</>
-              : <><XCircle className="w-3 h-3" />Failed</>}
+              : <><XCircle    className="w-3 h-3" />Failed</>}
           </span>
         )}
       </div>
       <div className="flex-1 overflow-auto p-4">
-        {output === null ? (
-          <div className="h-full flex flex-col items-center justify-center gap-2 text-slate-600">
-            <Terminal className="w-7 h-7" />
-            <p className="text-sm">Click "Run Code" to see output</p>
-          </div>
-        ) : (
-          <pre className={`text-sm font-mono whitespace-pre-wrap leading-relaxed ${output.success ? 'text-green-400' : 'text-red-400'}`}>
-            {output.text}
-          </pre>
-        )}
+        {output === null
+          ? <div className="h-full flex flex-col items-center justify-center gap-2 text-slate-600">
+              <Terminal className="w-7 h-7" />
+              <p className="text-sm">Click "Run Code" to see output</p>
+            </div>
+          : <pre className={`text-sm font-mono whitespace-pre-wrap leading-relaxed ${output.success ? 'text-green-400' : 'text-red-400'}`}>
+              {output.text}
+            </pre>
+        }
       </div>
     </div>
   );
 
-  // ── Render ───────────────────────────────────────────────────
+  const VideoSection = () => (
+    videoClient && call
+      ? <StreamVideo client={videoClient}>
+          <StreamCall call={call}>
+            <VideoCallUI onLeave={handleLeaveCall} />
+          </StreamCall>
+        </StreamVideo>
+      : <div className="h-full flex flex-col items-center justify-center bg-slate-900 gap-3">
+          <div className="w-8 h-8 border-2 border-blue-500/40 border-t-blue-500 rounded-full animate-spin" />
+          <p className="text-xs text-slate-500">Connecting to call...</p>
+        </div>
+  );
+
+  const ChatSection = () => (
+    chatClient && chatChannel
+      ? <Chat client={chatClient} theme="str-chat__theme-dark">
+          <Channel channel={chatChannel}>
+            <Window>
+              <ChannelHeader />
+              <MessageList />
+              <MessageInput />
+            </Window>
+          </Channel>
+        </Chat>
+      : <div className="h-full flex flex-col items-center justify-center bg-slate-950 gap-2">
+          <div className="w-6 h-6 border-2 border-blue-500/40 border-t-blue-500 rounded-full animate-spin" />
+          <p className="text-xs text-slate-500">Connecting to chat...</p>
+        </div>
+  );
+
+  // ── Render ────────────────────────────────────────────────────
   return (
     <div className="bg-slate-950 text-slate-100 h-screen flex flex-col overflow-hidden">
 
-      {/* ── Top bar (replaces full Navbar for session pages) ── */}
+      {/* Top bar */}
       <header className="h-14 flex items-center justify-between px-4 bg-slate-900/80 border-b border-slate-800 shrink-0 backdrop-blur-sm z-40">
         <div className="flex items-center gap-3">
           <button onClick={() => navigate('/dashboard')}
@@ -497,7 +531,6 @@ export default function SessionPage() {
             {problem.difficulty}
           </span>
         </div>
-
         <div className="flex items-center gap-2">
           {sessionData && (
             <div className="flex items-center gap-1.5 text-xs text-slate-500">
@@ -509,23 +542,22 @@ export default function SessionPage() {
             <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
             <span className="text-xs text-slate-400">Live</span>
           </div>
-          {isHost ? (
-            <button onClick={handleEndSession}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 text-xs font-medium transition-all">
-              <Phone className="w-3.5 h-3.5" /> End Session
-            </button>
-          ) : (
-            <button onClick={handleLeaveCall}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 text-xs font-medium transition-all">
-              <LogOut className="w-3.5 h-3.5" /> Leave
-            </button>
-          )}
+          {isHost
+            ? <button onClick={handleEndSession}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 text-xs font-medium transition-all">
+                <Phone className="w-3.5 h-3.5" /> End Session
+              </button>
+            : <button onClick={handleLeaveCall}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 text-xs font-medium transition-all">
+                <LogOut className="w-3.5 h-3.5" /> Leave
+              </button>
+          }
         </div>
       </header>
 
-      {/* ── Mobile tab switcher ── */}
+      {/* Mobile tab switcher */}
       <div className="lg:hidden flex border-b border-slate-800 bg-slate-900/50 shrink-0">
-        {['problem', 'editor'].map((v) => (
+        {['problem', 'editor'].map(v => (
           <button key={v} onClick={() => setMobileView(v)}
             className={`flex-1 py-2.5 text-xs font-semibold capitalize transition-all border-b-2 ${
               mobileView === v ? 'border-blue-500 text-blue-400' : 'border-transparent text-slate-500'
@@ -537,41 +569,31 @@ export default function SessionPage() {
 
       <div className="flex-1 overflow-hidden">
 
-        {/* ════════════════ DESKTOP ════════════════ */}
+        {/* ══════ DESKTOP ══════ */}
         <div className="hidden lg:block h-full">
           <PanelGroup direction="horizontal">
 
             {/* LEFT: Problem */}
-            <Panel defaultSize={28} minSize={22} maxSize={40}>
+            <Panel defaultSize={40} minSize={30} maxSize={48}>
               <ProblemPanel />
             </Panel>
 
             <PanelResizeHandle className="w-1.5 bg-slate-800 hover:bg-blue-500/40 transition-colors cursor-col-resize" />
 
-            {/* MIDDLE: Video + Editor */}
-            <Panel defaultSize={42} minSize={32}>
+            {/* MIDDLE: Video (top) + Editor (bottom) — one shared resize handle */}
+            <Panel defaultSize={28} minSize={22}>
               <PanelGroup direction="vertical">
 
-                {/* Video */}
-                <Panel defaultSize={38} minSize={28}>
-                  {videoClient && call ? (
-                    <StreamVideo client={videoClient}>
-                      <StreamCall call={call}>
-                        <VideoCallUI onLeave={handleLeaveCall} />
-                      </StreamCall>
-                    </StreamVideo>
-                  ) : (
-                    <div className="h-full flex flex-col items-center justify-center bg-slate-900 gap-3">
-                      <div className="w-8 h-8 border-2 border-blue-500/40 border-t-blue-500 rounded-full animate-spin" />
-                      <p className="text-xs text-slate-500">Connecting to call...</p>
-                    </div>
-                  )}
+                {/* ── Video ── */}
+                <Panel defaultSize={35} minSize={22}>
+                  <VideoSection />
                 </Panel>
 
-                <PanelResizeHandle className="h-1.5 bg-slate-800 hover:bg-blue-500/40 transition-colors cursor-row-resize" />
+                {/* ← drag this handle to balance video vs editor → */}
+                <PanelResizeHandle className="h-2 bg-blue-500/40 hover:bg-blue-500/70 transition-colors cursor-row-resize" />
 
-                {/* Editor */}
-                <Panel defaultSize={62} minSize={30}>
+                {/* ── Editor ── */}
+                <Panel defaultSize={65} minSize={35}>
                   <EditorPanel />
                 </Panel>
 
@@ -581,35 +603,18 @@ export default function SessionPage() {
             <PanelResizeHandle className="w-1.5 bg-slate-800 hover:bg-blue-500/40 transition-colors cursor-col-resize" />
 
             {/* RIGHT: Output + Chat */}
-            <Panel defaultSize={30} minSize={22}>
+            <Panel defaultSize={32} minSize={24}>
               <PanelGroup direction="vertical">
 
-                {/* Output */}
-                <Panel defaultSize={40} minSize={15}>
+                <Panel defaultSize={38} minSize={15}>
                   <OutputPanel />
                 </Panel>
 
                 <PanelResizeHandle className="h-1.5 bg-slate-800 hover:bg-blue-500/40 transition-colors cursor-row-resize" />
 
-                {/* Stream Chat */}
-                <Panel defaultSize={60} minSize={25}>
+                <Panel defaultSize={62} minSize={25}>
                   <div className="h-full overflow-hidden">
-                    {chatClient && chatChannel ? (
-                      <Chat client={chatClient} theme="str-chat__theme-dark">
-                        <Channel channel={chatChannel}>
-                          <Window>
-                            <ChannelHeader />
-                            <MessageList />
-                            <MessageInput />
-                          </Window>
-                        </Channel>
-                      </Chat>
-                    ) : (
-                      <div className="h-full flex flex-col items-center justify-center bg-slate-950 gap-2">
-                        <div className="w-6 h-6 border-2 border-blue-500/40 border-t-blue-500 rounded-full animate-spin" />
-                        <p className="text-xs text-slate-500">Connecting to chat...</p>
-                      </div>
-                    )}
+                    <ChatSection />
                   </div>
                 </Panel>
 
@@ -619,26 +624,13 @@ export default function SessionPage() {
           </PanelGroup>
         </div>
 
-        {/* ════════════════ MOBILE ════════════════ */}
+        {/* ══════ MOBILE ══════ */}
         <div className="lg:hidden h-full">
           {mobileView === 'problem' ? (
             <div className="h-full flex flex-col overflow-hidden">
-              {/* video strip */}
               <div className="h-48 shrink-0 border-b border-slate-800">
-                {videoClient && call ? (
-                  <StreamVideo client={videoClient}>
-                    <StreamCall call={call}>
-                      <VideoCallUI onLeave={handleLeaveCall} />
-                    </StreamCall>
-                  </StreamVideo>
-                ) : (
-                  <div className="h-full flex items-center justify-center bg-slate-900">
-                    <div className="w-6 h-6 border-2 border-blue-500/40 border-t-blue-500 rounded-full animate-spin" />
-                  </div>
-                )}
+                <VideoSection />
               </div>
-
-              {/* problem description (scrollable) */}
               <div className="flex-1 overflow-y-auto">
                 <div className="flex border-b border-slate-800 px-3 bg-slate-900/50 sticky top-0">
                   {tabs.map(({ id: tabId, label, icon: Icon }) => (
@@ -651,9 +643,7 @@ export default function SessionPage() {
                   ))}
                 </div>
                 <div className="p-4 space-y-4 pb-20">
-                  {activeTab === 'description' && (
-                    <p className="text-slate-300 text-sm leading-relaxed">{problem.description}</p>
-                  )}
+                  {activeTab === 'description' && <p className="text-slate-300 text-sm leading-relaxed">{problem.description}</p>}
                   {activeTab === 'examples' && problem.examples.map((ex, i) => (
                     <div key={i} className="rounded-xl border border-slate-800 bg-slate-900/40 overflow-hidden">
                       <div className="px-4 py-2 bg-slate-800/60 text-xs font-semibold text-slate-400 uppercase">Example {i + 1}</div>
@@ -670,23 +660,13 @@ export default function SessionPage() {
                   ))}
                 </div>
               </div>
-
-              {/* chat at bottom */}
               {chatClient && chatChannel && (
                 <div className="h-52 border-t border-slate-800 shrink-0 overflow-hidden">
-                  <Chat client={chatClient} theme="str-chat__theme-dark">
-                    <Channel channel={chatChannel}>
-                      <Window>
-                        <MessageList />
-                        <MessageInput />
-                      </Window>
-                    </Channel>
-                  </Chat>
+                  <ChatSection />
                 </div>
               )}
             </div>
           ) : (
-            /* mobile editor view */
             <div className="h-full flex flex-col">
               <EditorPanel />
               {output && (

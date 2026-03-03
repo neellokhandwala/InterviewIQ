@@ -23,6 +23,7 @@ const DashboardPage = () => {
   const [isCreating, setIsCreating] = useState(false)
   const [filterDifficulty, setFilterDifficulty] = useState('All')
   const [loading, setLoading] = useState(true)
+  const [detailSession, setDetailSession] = useState(null);
 
   useEffect(() => {
     const fetchSessions = async () => {
@@ -95,6 +96,14 @@ const DashboardPage = () => {
     if (h < 24) return `${h}h ago`
     return `${d}d ago`
   }
+
+  const formatDuration = (start, end) => {
+    const diffMs = new Date(end) - new Date(start);
+    const totalMin = Math.floor(diffMs / 60000);
+    if (totalMin < 1) return '< 1 min';
+    if (totalMin < 60) return `${totalMin} min`;
+    return `${Math.floor(totalMin / 60)}h ${totalMin % 60}m`;
+  };
 
   const diffColor = (d) => ({
     easy:   'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
@@ -345,7 +354,7 @@ const DashboardPage = () => {
                     </div>
 
                     <button 
-                      onClick={() => navigate(`/session/${session._id}`)}
+                      onClick={() => setDetailSession(session)}
                       className="w-full py-2 rounded-xl text-xs font-semibold text-slate-400 bg-slate-800/60 hover:bg-slate-800 hover:text-slate-200 transition-all duration-200 flex items-center justify-center gap-1.5">
                       <Code2 className="w-3.5 h-3.5" /> View Details
                     </button>
@@ -476,6 +485,50 @@ const DashboardPage = () => {
                     : <><Plus className="w-4 h-4" />Create Room</>
                   }
                 </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* ── SESSION DETAIL MODAL ── */}
+      {detailSession && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="w-full max-w-sm rounded-2xl bg-slate-900 border border-slate-700/60 shadow-2xl shadow-black/60 overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800">
+              <h2 className="text-base font-bold text-slate-100">Session Details</h2>
+              <button onClick={() => setDetailSession(null)}
+                className="p-2 rounded-lg hover:bg-slate-800 text-slate-500 hover:text-slate-200 transition-all">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div>
+                <p className="text-xs text-slate-500 mb-1">Problem</p>
+                <p className="text-sm font-semibold text-slate-100">{detailSession.problem}</p>
+              </div>
+              <div>
+                <p className="text-xs text-slate-500 mb-1">Difficulty</p>
+                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${diffColor(detailSession.difficulty)}`}>
+                  {detailSession.difficulty.charAt(0).toUpperCase() + detailSession.difficulty.slice(1)}
+                </span>
+              </div>
+              <div>
+                <p className="text-xs text-slate-500 mb-1">Created</p>
+                <p className="text-sm text-slate-300">{new Date(detailSession.createdAt).toLocaleString()}</p>
+              </div>
+              <div>
+                <p className="text-xs text-slate-500 mb-1">Duration</p>
+                <p className="text-sm text-slate-300">{formatDuration(detailSession.createdAt, detailSession.updatedAt)}</p>
+              </div>
+              <div>
+                <p className="text-xs text-slate-500 mb-1">Participants</p>
+                <p className="text-sm text-slate-300">{detailSession.participant ? '2 participants' : '1 participant'}</p>
+              </div>
+            </div>
+            <div className="px-6 pb-6">
+              <button onClick={() => setDetailSession(null)}
+                className="w-full py-2.5 rounded-xl text-sm font-semibold text-slate-400 bg-slate-800/60 hover:bg-slate-800 border border-slate-700/40 transition-all">
+                Close
               </button>
             </div>
           </div>
