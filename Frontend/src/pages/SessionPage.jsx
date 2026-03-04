@@ -4,9 +4,9 @@ import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 import Editor from '@monaco-editor/react';
 import {
   Play, Copy, Check, AlertCircle, Clock,
-  ChevronRight, BookOpen, TestTube,
-  Terminal, CheckCircle, XCircle,
-  Users, Phone, Home, LogOut,
+  ChevronRight, BookOpen, TestTube, Terminal,
+  CheckCircle, XCircle, Users, Phone, Home,
+  LogOut, Loader2, MessageSquare, X,
 } from 'lucide-react';
 import { useUser } from '@clerk/clerk-react';
 import { useQuery } from '@tanstack/react-query';
@@ -28,12 +28,8 @@ import '@stream-io/video-react-sdk/dist/css/styles.css';
 // Stream Chat
 import { StreamChat } from 'stream-chat';
 import {
-  Chat,
-  Channel,
-  Window,
-  MessageList,
-  MessageInput,
-  ChannelHeader,
+  Chat, Channel, Window,
+  MessageList, MessageInput, ChannelHeader,
 } from 'stream-chat-react';
 import 'stream-chat-react/dist/css/v2/index.css';
 
@@ -42,7 +38,6 @@ import { executeCode } from '../lib/piston';
 import toast from 'react-hot-toast';
 import confetti from 'canvas-confetti';
 
-// ─── Constants ───────────────────────────────────────────────────
 const STREAM_API_KEY = import.meta.env.VITE_STREAM_API_KEY;
 
 const languages = [
@@ -60,11 +55,23 @@ const getDifficultyColor = (d) => ({
 const normalize = (str) =>
   str.trim().replace(/\r\n/g, '\n').replace(/\s+$/gm, '').toLowerCase();
 
-// ─── VideoCallUI (must live inside <StreamCall>) ──────────────────
-function VideoCallUI({ onLeave }) {
+// ─── VideoCallUI ──────────────────────────────────────────────────
+function VideoCallUI({ onLeave, chatClient, chatChannel }) {
   const { useCallCallingState, useParticipantCount } = useCallStateHooks();
-  const callingState = useCallCallingState();
-  const count        = useParticipantCount();
+  const callingState  = useCallCallingState();
+  const count         = useParticipantCount();
+  const [chatOpen, setChatOpen] = useState(false);
+
+  if (callingState === CallingState.JOINING) {
+    return (
+      <div className="h-full flex items-center justify-center bg-slate-900">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="w-8 h-8 animate-spin text-blue-400" />
+          <p className="text-slate-400 text-sm">Joining call...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (callingState === CallingState.LEFT) {
     return (
@@ -76,24 +83,68 @@ function VideoCallUI({ onLeave }) {
 
   return (
     <StreamTheme>
-      <div className="h-full flex flex-col bg-slate-900">
-        <div className="flex items-center justify-between px-4 py-2 bg-slate-950/80 border-b border-slate-800 shrink-0">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-            <span className="text-xs font-semibold text-slate-300">Live Video</span>
-            <span className="text-xs text-slate-600">• {count} participant{count !== 1 ? 's' : ''}</span>
+      <div className="h-full flex gap-3 bg-slate-900 p-3">
+        {/* Video column */}
+        <div className="flex-1 flex flex-col gap-3 min-w-0">
+          {/* top bar */}
+          <div className="flex items-center justify-between bg-slate-800/80 px-4 py-2 rounded-xl border border-slate-700/50">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+              <span className="text-xs font-semibold text-slate-300">Live</span>
+              <span className="text-xs text-slate-500">• {count} participant{count !== 1 ? 's' : ''}</span>
+            </div>
+            {chatClient && chatChannel && (
+              <button
+                onClick={() => setChatOpen(o => !o)}
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium transition-all ${
+                  chatOpen
+                    ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                    : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                }`}
+              >
+                <MessageSquare className="w-3.5 h-3.5" /> Chat
+              </button>
+            )}
           </div>
-          <button onClick={onLeave}
-            className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 text-xs font-medium transition-all">
-            <Phone className="w-3 h-3" /> Leave
-          </button>
+
+          {/* speaker layout */}
+          <div className="flex-1 bg-slate-950 rounded-xl overflow-hidden">
+            <SpeakerLayout participantsBarPosition="bottom" />
+          </div>
+
+          {/* controls */}
+          <div className="flex justify-center bg-slate-800/80 py-2 rounded-xl border border-slate-700/50">
+            <CallControls onLeave={onLeave} />
+          </div>
         </div>
-        <div className="flex-1 overflow-hidden">
-          <SpeakerLayout participantsBarPosition="bottom" />
-        </div>
-        <div className="shrink-0 flex justify-center py-2 bg-slate-950/80 border-t border-slate-800">
-          <CallControls onLeave={onLeave} />
-        </div>
+
+        {/* Chat slide-in */}
+        {chatClient && chatChannel && (
+          <div className={`flex flex-col rounded-xl overflow-hidden border border-slate-700/50 bg-slate-950 transition-all duration-300 ${
+            chatOpen ? 'w-72 opacity-100' : 'w-0 opacity-0 pointer-events-none'
+          }`}>
+            {chatOpen && (
+              <>
+                <div className="flex items-center justify-between px-4 py-2.5 bg-slate-900 border-b border-slate-800 shrink-0">
+                  <span className="text-xs font-semibold text-slate-300">Session Chat</span>
+                  <button onClick={() => setChatOpen(false)} className="text-slate-500 hover:text-slate-200 transition-colors">
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+                <div className="flex-1 overflow-hidden">
+                  <Chat client={chatClient} theme="str-chat__theme-dark">
+                    <Channel channel={chatChannel}>
+                      <Window>
+                        <MessageList />
+                        <MessageInput />
+                      </Window>
+                    </Channel>
+                  </Chat>
+                </div>
+              </>
+            )}
+          </div>
+        )}
       </div>
     </StreamTheme>
   );
@@ -105,26 +156,26 @@ export default function SessionPage() {
   const navigate      = useNavigate();
   const { user }      = useUser();
 
-  // Refs — never trigger re-renders, safe to use in cleanup
-  const codeRef    = useRef('');
-  const vcRef      = useRef(null);   // StreamVideoClient
-  const callRef    = useRef(null);   // Call
-  const ccRef      = useRef(null);   // StreamChat
+  // Refs for cleanup
+  const vcRef        = useRef(null);
+  const callRef      = useRef(null);
+  const ccRef        = useRef(null);
+  const cleanedUpRef = useRef(false); // guard against double-cleanup
+  const rafRef       = useRef(null);  // cancel pending RAF on re-cleanup
 
-  // Stream UI state
+  // Stream state
   const [videoClient,  setVideoClient]  = useState(null);
   const [call,         setCall]         = useState(null);
   const [chatClient,   setChatClient]   = useState(null);
   const [chatChannel,  setChatChannel]  = useState(null);
 
-  // Editor state
+  // Editor — fully controlled, so code is always current when Run is clicked
   const [selectedLanguage, setSelectedLanguage] = useState('javascript');
   const [code,             setCode]             = useState('');
   const [output,           setOutput]           = useState(null);
   const [isRunning,        setIsRunning]         = useState(false);
   const [copied,           setCopied]           = useState(false);
   const [activeTab,        setActiveTab]         = useState('description');
-  const [mobileView,       setMobileView]        = useState('problem');
 
   // ── Fetch session ────────────────────────────────────────────
   const { data: sessionData, isLoading: sessionLoading, error: sessionError } = useQuery({
@@ -151,25 +202,23 @@ export default function SessionPage() {
     ? Object.values(PROBLEMS_DATA).find(p => p.title === sessionData.problem) || PROBLEMS_DATA[1]
     : PROBLEMS_DATA[1];
 
-  // ── Load code from localStorage ──────────────────────────────
+  // ── Sync code when problem or language changes ───────────────
+  // Controlled editor: just set state — Monaco re-renders cleanly
   useEffect(() => {
     const saved   = localStorage.getItem(`code_${problem.id}_${selectedLanguage}`);
     const initial = saved || problem.starterCode?.[selectedLanguage] || '';
     setCode(initial);
-    codeRef.current = initial;
     setOutput(null);
   }, [problem.id, selectedLanguage]);
 
-  // ── Initialize Stream Video + Chat ───────────────────────────
+  // ── Stream init ──────────────────────────────────────────────
   useEffect(() => {
     if (!tokenData || !sessionData || !user) return;
 
     const { token, videoToken, userId } = tokenData;
-    const callId  = sessionData.callId;
-    // Guarantee name is always a non-empty string (fixes "user_details" WS error)
+    const callId   = sessionData.callId;
     const userName = user.fullName || user.username || userId;
 
-    // ── Video ── use getOrCreateInstance to avoid duplicate-client warning
     const vc = StreamVideoClient.getOrCreateInstance({
       apiKey: STREAM_API_KEY,
       user:   { id: userId, name: userName },
@@ -178,52 +227,53 @@ export default function SessionPage() {
     const c = vc.call('default', callId);
     c.join({ create: true }).catch(err => console.error('[stream] join failed:', err));
 
-    vcRef.current  = vc;
-    callRef.current = c;
+    cleanedUpRef.current = false; // reset for this mount
+    vcRef.current        = vc;
+    callRef.current      = c;
     setVideoClient(vc);
     setCall(c);
 
-    // ── Chat ── async IIFE keeps cleanup synchronous
     const cc = StreamChat.getInstance(STREAM_API_KEY);
     ccRef.current = cc;
 
     (async () => {
       try {
-        // If a previous session left the singleton connected, disconnect first
-        if (cc.userID) {
-          await cc.disconnectUser();
-        }
+        if (cc.userID) await cc.disconnectUser();
         await cc.connectUser({ id: userId, name: userName }, token);
-        console.log('[stream] chat connected');
         const ch = cc.channel('messaging', callId);
         await ch.watch();
-        // Only update state if still on this page
         setChatClient(cc);
         setChatChannel(ch);
-        console.log('[stream] channel ready:', callId);
       } catch (err) {
         console.error('[stream] chat error:', err);
       }
     })();
 
-    // ── Cleanup ─────────────────────────────────────────────────
-    // IMPORTANT: null the React state first (removes Stream components from DOM),
-    // then disconnect on the next animation frame — this prevents the crash
-    // "can't use a channel after client.disconnect()" caused by React still
-    // rendering ChannelInner children when disconnect is called synchronously.
     return () => {
+      // Guard: StrictMode mounts/unmounts twice; user may have already left
+      if (cleanedUpRef.current) return;
+      cleanedUpRef.current = true;
+
+      // Cancel any pending RAF from a previous cleanup cycle
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+
+      // Leave video synchronously — stops SDK participant events immediately
+      callRef.current?.leave().catch(() => {/* already left — ignore */});
+      vcRef.current?.disconnectUser().catch(console.error);
+      callRef.current = null;
+      vcRef.current   = null;
+
+      // Null React state so Stream chat components unmount before disconnect
       setChatChannel(null);
       setChatClient(null);
       setCall(null);
       setVideoClient(null);
 
-      requestAnimationFrame(() => {
-        callRef.current?.leave().catch(console.error);
-        vcRef.current?.disconnectUser().catch(console.error);
+      // Disconnect chat one frame later so <Channel> unmounts cleanly first
+      rafRef.current = requestAnimationFrame(() => {
         ccRef.current?.disconnectUser().catch(console.error);
-        callRef.current  = null;
-        vcRef.current    = null;
-        ccRef.current    = null;
+        ccRef.current  = null;
+        rafRef.current = null;
       });
     };
   }, [tokenData, sessionData, user]);
@@ -242,13 +292,14 @@ export default function SessionPage() {
   // ── Handlers ─────────────────────────────────────────────────
   const handleLanguageChange = (langId) => setSelectedLanguage(langId);
 
+  // code state is always current (controlled editor) — no ref needed
   const handleRunCode = async () => {
     setIsRunning(true);
     setOutput(null);
     try {
-      let codeToRun = codeRef.current || code;
+      let codeToRun = code;
       if (selectedLanguage !== 'java' && problem.testRunner?.[selectedLanguage]) {
-        codeToRun = codeRef.current + '\n' + problem.testRunner[selectedLanguage];
+        codeToRun = code + '\n' + problem.testRunner[selectedLanguage];
       }
       const result = await executeCode(selectedLanguage, codeToRun);
       if (result.success) {
@@ -275,7 +326,7 @@ export default function SessionPage() {
   };
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(codeRef.current || code);
+    navigator.clipboard.writeText(code);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -324,196 +375,6 @@ export default function SessionPage() {
     </div>
   );
 
-  // ── Sub-panels ───────────────────────────────────────────────
-  const ProblemPanel = () => (
-    <div className="h-full flex flex-col border-r border-slate-800 bg-slate-950 overflow-hidden">
-      <div className="px-5 pt-4 pb-3 border-b border-slate-800 space-y-2 shrink-0">
-        <div className="flex items-center gap-2 text-xs text-slate-500">
-          <button onClick={() => navigate('/dashboard')}
-            className="hover:text-blue-400 flex items-center gap-1 transition-colors">
-            <Home className="w-3 h-3" /> Dashboard
-          </button>
-          <ChevronRight className="w-3 h-3" />
-          <span className="text-slate-300 truncate">#{problem.id} {problem.title}</span>
-        </div>
-        <h1 className="text-lg font-bold text-slate-100">{problem.title}</h1>
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className={`px-2.5 py-0.5 rounded-full border text-xs font-semibold ${getDifficultyColor(problem.difficulty)}`}>
-            {problem.difficulty}
-          </span>
-          <span className="px-2.5 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-xs text-slate-300">
-            {problem.category}
-          </span>
-          <div className="flex items-center gap-2 text-xs text-slate-500 ml-auto">
-            <Clock className="w-3 h-3" />{problem.timeLimit}
-          </div>
-        </div>
-      </div>
-
-      <div className="flex border-b border-slate-800 px-3 shrink-0 overflow-x-auto">
-        {tabs.map(({ id: tabId, label, icon: Icon }) => (
-          <button key={tabId} onClick={() => setActiveTab(tabId)}
-            className={`flex items-center gap-1.5 px-3 py-2.5 text-xs font-medium border-b-2 transition-all whitespace-nowrap ${
-              activeTab === tabId ? 'border-blue-500 text-blue-400' : 'border-transparent text-slate-400 hover:text-slate-200'
-            }`}>
-            <Icon className="w-3.5 h-3.5" />{label}
-          </button>
-        ))}
-      </div>
-
-      <div className="flex-1 overflow-y-auto p-5 space-y-4">
-        {activeTab === 'description' && (
-          <p className="text-slate-300 leading-relaxed text-sm">{problem.description}</p>
-        )}
-        {activeTab === 'examples' && (
-          <div className="space-y-3">
-            {problem.examples.map((ex, i) => (
-              <div key={i} className="rounded-xl border border-slate-800 bg-slate-900/40 overflow-hidden">
-                <div className="px-4 py-2 bg-slate-800/60 border-b border-slate-800 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                  Example {i + 1}
-                </div>
-                <div className="p-4 space-y-2 font-mono text-xs">
-                  <div className="flex gap-2"><span className="text-blue-400 font-bold w-16 shrink-0">Input:</span><span className="text-slate-300">{ex.input}</span></div>
-                  <div className="flex gap-2"><span className="text-green-400 font-bold w-16 shrink-0">Output:</span><span className="text-slate-300">{ex.output}</span></div>
-                  {ex.explanation && (
-                    <div className="flex gap-2 pt-2 border-t border-slate-800">
-                      <span className="text-slate-500 font-bold w-16 shrink-0">Explain:</span>
-                      <span className="text-slate-400">{ex.explanation}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-        {activeTab === 'constraints' && (
-          <ul className="space-y-2">
-            {problem.constraints.map((c, i) => (
-              <li key={i} className="flex items-start gap-3 bg-slate-900/40 border border-slate-800 rounded-lg px-4 py-3">
-                <span className="text-blue-400 font-bold mt-0.5">•</span>
-                <code className="font-mono text-xs text-slate-300">{c}</code>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-    </div>
-  );
-
-  const EditorPanel = () => (
-    <div className="h-full flex flex-col bg-slate-900">
-      <div className="flex items-center justify-between px-4 py-2.5 bg-slate-950/80 border-b border-slate-800 shrink-0">
-        <div className="flex gap-1.5">
-          {languages.map(lang => (
-            <button key={lang.id} onClick={() => handleLanguageChange(lang.id)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                selectedLanguage === lang.id
-                  ? 'bg-blue-600 text-white shadow-md shadow-blue-500/30'
-                  : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
-              }`}>
-              <span>{lang.icon}</span>{lang.name}
-            </button>
-          ))}
-        </div>
-        <div className="flex items-center gap-2">
-          <button onClick={handleCopy}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 hover:text-slate-200 rounded-lg transition-all text-xs">
-            {copied
-              ? <><Check className="w-3.5 h-3.5 text-green-400" /><span className="text-green-400">Copied!</span></>
-              : <><Copy className="w-3.5 h-3.5" /><span>Copy</span></>}
-          </button>
-          <button onClick={handleRunCode} disabled={isRunning}
-            className="relative group flex items-center gap-2 px-4 py-1.5 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-semibold rounded-lg transition-all disabled:opacity-50 text-xs overflow-hidden">
-            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
-            {isRunning
-              ? <><div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />Running...</>
-              : <><Play className="w-3.5 h-3.5" />Run Code</>}
-          </button>
-        </div>
-      </div>
-      <div className="flex-1 overflow-hidden">
-        <Editor
-          key={`${problem.id}_${selectedLanguage}`}
-          height="100%"
-          language={languages.find(l => l.id === selectedLanguage)?.monacoLang}
-          defaultValue={code}
-          onChange={val => {
-            codeRef.current = val || '';
-            localStorage.setItem(`code_${problem.id}_${selectedLanguage}`, val || '');
-          }}
-          theme="vs-dark"
-          options={{
-            fontSize: 14, fontFamily: 'Fira Code, JetBrains Mono, monospace',
-            fontLigatures: true, lineNumbers: 'on', minimap: { enabled: false },
-            scrollBeyondLastLine: false, automaticLayout: true,
-            padding: { top: 12 }, renderLineHighlight: 'gutter', smoothScrolling: true,
-          }}
-        />
-      </div>
-    </div>
-  );
-
-  const OutputPanel = () => (
-    <div className="h-full flex flex-col bg-slate-950">
-      <div className="flex items-center gap-2 px-4 py-2.5 border-b border-slate-800 shrink-0">
-        <Terminal className="w-4 h-4 text-slate-400" />
-        <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Output</span>
-        {output && (
-          <span className={`ml-auto flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border font-medium ${
-            output.success
-              ? 'bg-green-500/10 text-green-400 border-green-500/30'
-              : 'bg-red-500/10   text-red-400   border-red-500/30'
-          }`}>
-            {output.success
-              ? <><CheckCircle className="w-3 h-3" />All Passed</>
-              : <><XCircle    className="w-3 h-3" />Failed</>}
-          </span>
-        )}
-      </div>
-      <div className="flex-1 overflow-auto p-4">
-        {output === null
-          ? <div className="h-full flex flex-col items-center justify-center gap-2 text-slate-600">
-              <Terminal className="w-7 h-7" />
-              <p className="text-sm">Click "Run Code" to see output</p>
-            </div>
-          : <pre className={`text-sm font-mono whitespace-pre-wrap leading-relaxed ${output.success ? 'text-green-400' : 'text-red-400'}`}>
-              {output.text}
-            </pre>
-        }
-      </div>
-    </div>
-  );
-
-  const VideoSection = () => (
-    videoClient && call
-      ? <StreamVideo client={videoClient}>
-          <StreamCall call={call}>
-            <VideoCallUI onLeave={handleLeaveCall} />
-          </StreamCall>
-        </StreamVideo>
-      : <div className="h-full flex flex-col items-center justify-center bg-slate-900 gap-3">
-          <div className="w-8 h-8 border-2 border-blue-500/40 border-t-blue-500 rounded-full animate-spin" />
-          <p className="text-xs text-slate-500">Connecting to call...</p>
-        </div>
-  );
-
-  const ChatSection = () => (
-    chatClient && chatChannel
-      ? <Chat client={chatClient} theme="str-chat__theme-dark">
-          <Channel channel={chatChannel}>
-            <Window>
-              <ChannelHeader />
-              <MessageList />
-              <MessageInput />
-            </Window>
-          </Channel>
-        </Chat>
-      : <div className="h-full flex flex-col items-center justify-center bg-slate-950 gap-2">
-          <div className="w-6 h-6 border-2 border-blue-500/40 border-t-blue-500 rounded-full animate-spin" />
-          <p className="text-xs text-slate-500">Connecting to chat...</p>
-        </div>
-  );
-
   // ── Render ────────────────────────────────────────────────────
   return (
     <div className="bg-slate-950 text-slate-100 h-screen flex flex-col overflow-hidden">
@@ -526,12 +387,12 @@ export default function SessionPage() {
             <Home className="w-4 h-4" /> Dashboard
           </button>
           <span className="text-slate-700">/</span>
-          <span className="text-xs text-slate-300 font-medium truncate max-w-40">{problem.title}</span>
+          <span className="text-xs text-slate-300 font-medium truncate max-w-48">{problem.title}</span>
           <span className={`px-2 py-0.5 rounded-full border text-xs font-semibold ${getDifficultyColor(problem.difficulty)}`}>
             {problem.difficulty}
           </span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           {sessionData && (
             <div className="flex items-center gap-1.5 text-xs text-slate-500">
               <Users className="w-3.5 h-3.5" />
@@ -555,131 +416,188 @@ export default function SessionPage() {
         </div>
       </header>
 
-      {/* Mobile tab switcher */}
-      <div className="lg:hidden flex border-b border-slate-800 bg-slate-900/50 shrink-0">
-        {['problem', 'editor'].map(v => (
-          <button key={v} onClick={() => setMobileView(v)}
-            className={`flex-1 py-2.5 text-xs font-semibold capitalize transition-all border-b-2 ${
-              mobileView === v ? 'border-blue-500 text-blue-400' : 'border-transparent text-slate-500'
-            }`}>
-            {v === 'problem' ? 'Problem' : 'Code Editor'}
-          </button>
-        ))}
-      </div>
-
+      {/* Main panels */}
       <div className="flex-1 overflow-hidden">
+        <PanelGroup direction="horizontal">
 
-        {/* ══════ DESKTOP ══════ */}
-        <div className="hidden lg:block h-full">
-          <PanelGroup direction="horizontal">
+          {/* ── LEFT: Problem + Code Editor + Output ── */}
+          <Panel defaultSize={55} minSize={38}>
+            <PanelGroup direction="vertical">
 
-            {/* LEFT: Problem */}
-            <Panel defaultSize={40} minSize={30} maxSize={48}>
-              <ProblemPanel />
-            </Panel>
-
-            <PanelResizeHandle className="w-1.5 bg-slate-800 hover:bg-blue-500/40 transition-colors cursor-col-resize" />
-
-            {/* MIDDLE: Video (top) + Editor (bottom) — one shared resize handle */}
-            <Panel defaultSize={28} minSize={22}>
-              <PanelGroup direction="vertical">
-
-                {/* ── Video ── */}
-                <Panel defaultSize={35} minSize={22}>
-                  <VideoSection />
-                </Panel>
-
-                {/* ← drag this handle to balance video vs editor → */}
-                <PanelResizeHandle className="h-2 bg-blue-500/40 hover:bg-blue-500/70 transition-colors cursor-row-resize" />
-
-                {/* ── Editor ── */}
-                <Panel defaultSize={65} minSize={35}>
-                  <EditorPanel />
-                </Panel>
-
-              </PanelGroup>
-            </Panel>
-
-            <PanelResizeHandle className="w-1.5 bg-slate-800 hover:bg-blue-500/40 transition-colors cursor-col-resize" />
-
-            {/* RIGHT: Output + Chat */}
-            <Panel defaultSize={32} minSize={24}>
-              <PanelGroup direction="vertical">
-
-                <Panel defaultSize={38} minSize={15}>
-                  <OutputPanel />
-                </Panel>
-
-                <PanelResizeHandle className="h-1.5 bg-slate-800 hover:bg-blue-500/40 transition-colors cursor-row-resize" />
-
-                <Panel defaultSize={62} minSize={25}>
-                  <div className="h-full overflow-hidden">
-                    <ChatSection />
+              {/* Problem description */}
+              <Panel defaultSize={45} minSize={20}>
+                <div className="h-full flex flex-col border-r border-slate-800 bg-slate-950 overflow-hidden">
+                  {/* tabs */}
+                  <div className="flex border-b border-slate-800 px-3 shrink-0">
+                    {tabs.map(({ id: tabId, label, icon: Icon }) => (
+                      <button key={tabId} onClick={() => setActiveTab(tabId)}
+                        className={`flex items-center gap-1.5 px-3 py-2.5 text-xs font-medium border-b-2 transition-all whitespace-nowrap ${
+                          activeTab === tabId ? 'border-blue-500 text-blue-400' : 'border-transparent text-slate-400 hover:text-slate-200'
+                        }`}>
+                        <Icon className="w-3.5 h-3.5" />{label}
+                      </button>
+                    ))}
                   </div>
-                </Panel>
-
-              </PanelGroup>
-            </Panel>
-
-          </PanelGroup>
-        </div>
-
-        {/* ══════ MOBILE ══════ */}
-        <div className="lg:hidden h-full">
-          {mobileView === 'problem' ? (
-            <div className="h-full flex flex-col overflow-hidden">
-              <div className="h-48 shrink-0 border-b border-slate-800">
-                <VideoSection />
-              </div>
-              <div className="flex-1 overflow-y-auto">
-                <div className="flex border-b border-slate-800 px-3 bg-slate-900/50 sticky top-0">
-                  {tabs.map(({ id: tabId, label, icon: Icon }) => (
-                    <button key={tabId} onClick={() => setActiveTab(tabId)}
-                      className={`flex items-center gap-1.5 px-3 py-2.5 text-xs font-medium border-b-2 transition-all whitespace-nowrap ${
-                        activeTab === tabId ? 'border-blue-500 text-blue-400' : 'border-transparent text-slate-400'
-                      }`}>
-                      <Icon className="w-3.5 h-3.5" />{label}
-                    </button>
-                  ))}
-                </div>
-                <div className="p-4 space-y-4 pb-20">
-                  {activeTab === 'description' && <p className="text-slate-300 text-sm leading-relaxed">{problem.description}</p>}
-                  {activeTab === 'examples' && problem.examples.map((ex, i) => (
-                    <div key={i} className="rounded-xl border border-slate-800 bg-slate-900/40 overflow-hidden">
-                      <div className="px-4 py-2 bg-slate-800/60 text-xs font-semibold text-slate-400 uppercase">Example {i + 1}</div>
-                      <div className="p-4 font-mono text-xs space-y-2">
-                        <div><span className="text-blue-400 font-bold">Input: </span><span className="text-slate-300">{ex.input}</span></div>
-                        <div><span className="text-green-400 font-bold">Output: </span><span className="text-slate-300">{ex.output}</span></div>
+                  {/* content */}
+                  <div className="flex-1 overflow-y-auto p-5 space-y-4">
+                    {activeTab === 'description' && (
+                      <p className="text-slate-300 leading-relaxed text-sm">{problem.description}</p>
+                    )}
+                    {activeTab === 'examples' && (
+                      <div className="space-y-3">
+                        {problem.examples.map((ex, i) => (
+                          <div key={i} className="rounded-xl border border-slate-800 bg-slate-900/40 overflow-hidden">
+                            <div className="px-4 py-2 bg-slate-800/60 border-b border-slate-800 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                              Example {i + 1}
+                            </div>
+                            <div className="p-4 space-y-2 font-mono text-xs">
+                              <div className="flex gap-2"><span className="text-blue-400 font-bold w-16 shrink-0">Input:</span><span className="text-slate-300">{ex.input}</span></div>
+                              <div className="flex gap-2"><span className="text-green-400 font-bold w-16 shrink-0">Output:</span><span className="text-slate-300">{ex.output}</span></div>
+                              {ex.explanation && (
+                                <div className="flex gap-2 pt-2 border-t border-slate-800">
+                                  <span className="text-slate-500 font-bold w-16 shrink-0">Explain:</span>
+                                  <span className="text-slate-400">{ex.explanation}</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                    </div>
-                  ))}
-                  {activeTab === 'constraints' && problem.constraints.map((c, i) => (
-                    <div key={i} className="flex gap-2 bg-slate-900/40 border border-slate-800 rounded-lg px-4 py-3 text-xs">
-                      <span className="text-blue-400">•</span><code className="text-slate-300">{c}</code>
-                    </div>
-                  ))}
+                    )}
+                    {activeTab === 'constraints' && (
+                      <ul className="space-y-2">
+                        {problem.constraints.map((c, i) => (
+                          <li key={i} className="flex items-start gap-3 bg-slate-900/40 border border-slate-800 rounded-lg px-4 py-3">
+                            <span className="text-blue-400 font-bold mt-0.5">•</span>
+                            <code className="font-mono text-xs text-slate-300">{c}</code>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
                 </div>
-              </div>
-              {chatClient && chatChannel && (
-                <div className="h-52 border-t border-slate-800 shrink-0 overflow-hidden">
-                  <ChatSection />
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="h-full flex flex-col">
-              <EditorPanel />
-              {output && (
-                <div className="border-t border-slate-800 bg-slate-950 p-3 max-h-36 overflow-auto shrink-0">
-                  <pre className={`text-xs font-mono whitespace-pre-wrap ${output.success ? 'text-green-400' : 'text-red-400'}`}>
-                    {output.text}
-                  </pre>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
+              </Panel>
 
+              <PanelResizeHandle className="h-1.5 bg-slate-800 hover:bg-blue-500/40 transition-colors cursor-row-resize" />
+
+              {/* Code editor */}
+              <Panel defaultSize={40} minSize={20}>
+                <div className="h-full flex flex-col bg-slate-900">
+                  <div className="flex items-center justify-between px-4 py-2.5 bg-slate-950/80 border-b border-slate-800 shrink-0">
+                    <div className="flex gap-1.5">
+                      {languages.map(lang => (
+                        <button key={lang.id} onClick={() => handleLanguageChange(lang.id)}
+                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                            selectedLanguage === lang.id
+                              ? 'bg-blue-600 text-white shadow-md shadow-blue-500/30'
+                              : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+                          }`}>
+                          <span>{lang.icon}</span>{lang.name}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button onClick={handleCopy}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 hover:text-slate-200 rounded-lg transition-all text-xs">
+                        {copied
+                          ? <><Check className="w-3.5 h-3.5 text-green-400" /><span className="text-green-400">Copied!</span></>
+                          : <><Copy className="w-3.5 h-3.5" /><span>Copy</span></>}
+                      </button>
+                      <button onClick={handleRunCode} disabled={isRunning}
+                        className="relative group flex items-center gap-2 px-4 py-1.5 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-semibold rounded-lg transition-all disabled:opacity-50 text-xs overflow-hidden">
+                        <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+                        {isRunning
+                          ? <><div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />Running...</>
+                          : <><Play className="w-3.5 h-3.5" />Run Code</>}
+                      </button>
+                    </div>
+                  </div>
+                  <div className="flex-1 overflow-hidden">
+                    {/* 
+                      Controlled editor (value + onChange sets state).
+                      key resets Monaco when language changes.
+                      Code state is always current when handleRunCode reads it.
+                    */}
+                    <Editor
+                      key={`${problem.id}_${selectedLanguage}`}
+                      height="100%"
+                      language={languages.find(l => l.id === selectedLanguage)?.monacoLang}
+                      value={code}
+                      onChange={val => {
+                        const v = val || '';
+                        setCode(v);
+                        localStorage.setItem(`code_${problem.id}_${selectedLanguage}`, v);
+                      }}
+                      theme="vs-dark"
+                      options={{
+                        fontSize: 14, fontFamily: 'Fira Code, JetBrains Mono, monospace',
+                        fontLigatures: true, lineNumbers: 'on', minimap: { enabled: false },
+                        scrollBeyondLastLine: false, automaticLayout: true,
+                        padding: { top: 12 }, renderLineHighlight: 'gutter', smoothScrolling: true,
+                      }}
+                    />
+                  </div>
+                </div>
+              </Panel>
+
+              <PanelResizeHandle className="h-1.5 bg-slate-800 hover:bg-blue-500/40 transition-colors cursor-row-resize" />
+
+              {/* Output */}
+              <Panel defaultSize={15} minSize={10}>
+                <div className="h-full flex flex-col bg-slate-950">
+                  <div className="flex items-center gap-2 px-4 py-2.5 border-b border-slate-800 shrink-0">
+                    <Terminal className="w-4 h-4 text-slate-400" />
+                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Output</span>
+                    {output && (
+                      <span className={`ml-auto flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border font-medium ${
+                        output.success
+                          ? 'bg-green-500/10 text-green-400 border-green-500/30'
+                          : 'bg-red-500/10   text-red-400   border-red-500/30'
+                      }`}>
+                        {output.success
+                          ? <><CheckCircle className="w-3 h-3" />Passed</>
+                          : <><XCircle    className="w-3 h-3" />Failed</>}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex-1 overflow-auto p-4">
+                    {output === null
+                      ? <p className="text-slate-600 text-sm">Click "Run Code" to see output here...</p>
+                      : <pre className={`text-sm font-mono whitespace-pre-wrap leading-relaxed ${output.success ? 'text-green-400' : 'text-red-400'}`}>
+                          {output.text}
+                        </pre>
+                    }
+                  </div>
+                </div>
+              </Panel>
+
+            </PanelGroup>
+          </Panel>
+
+          <PanelResizeHandle className="w-1.5 bg-slate-800 hover:bg-blue-500/40 transition-colors cursor-col-resize" />
+
+          {/* ── RIGHT: Video + Chat ── */}
+          <Panel defaultSize={45} minSize={30}>
+            <div className="h-full bg-slate-900">
+              {videoClient && call
+                ? <StreamVideo client={videoClient}>
+                    <StreamCall call={call}>
+                      <VideoCallUI
+                        onLeave={handleLeaveCall}
+                        chatClient={chatClient}
+                        chatChannel={chatChannel}
+                      />
+                    </StreamCall>
+                  </StreamVideo>
+                : <div className="h-full flex flex-col items-center justify-center bg-slate-900 gap-3">
+                    <div className="w-8 h-8 border-2 border-blue-500/40 border-t-blue-500 rounded-full animate-spin" />
+                    <p className="text-xs text-slate-500">Connecting to call...</p>
+                  </div>
+              }
+            </div>
+          </Panel>
+
+        </PanelGroup>
       </div>
     </div>
   );
