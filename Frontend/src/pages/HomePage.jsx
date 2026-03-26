@@ -25,30 +25,27 @@ function HomePage() {
   };
 
   return (
-    <div className="bg-slate-950 text-slate-100 min-h-screen overflow-hidden">
+    <div className="min-h-screen overflow-hidden transition-colors duration-200" style={{ backgroundColor: 'var(--bg-base)', color: 'var(--text-primary)' }}>
       <Navbar />
 
       {/* HERO SECTION */}
       <section className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-32">
         {/* Background accent */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl -z-10"></div>
+        <div className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl -z-10" style={{ backgroundColor: 'rgba(217,119,6,0.04)' }}></div>
 
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left Content */}
           <div className="space-y-8">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-slate-800/50 border border-slate-700 rounded-full">
-              <Terminal className="w-4 h-4 text-blue-400" />
-              <span className="text-sm text-slate-300">Interview at your pace</span>
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full transition-colors duration-200 border" style={{ backgroundColor: 'var(--bg-elevated)', borderColor: 'var(--border)' }}>
+              <Terminal className="w-4 h-4" style={{ color: 'var(--accent)' }} />
+              <span className="text-sm transition-colors duration-200" style={{ color: 'var(--text-secondary)' }}>Interview at your pace</span>
             </div>
 
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold leading-tight">
-              <span className="text-slate-100">Master coding </span>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-blue-400">
-                interviews together
-              </span>
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold leading-tight" style={{ color: 'var(--text-primary)' }}>
+              Master coding interviews together
             </h1>
 
-            <p className="text-xl text-slate-400 leading-relaxed max-w-lg">
+            <p className="text-xl leading-relaxed max-w-lg transition-colors duration-200" style={{ color: 'var(--text-secondary)' }}>
               Real-time collaboration, live code execution, and instant feedback.
               Practice with peers or interviewers in a professional coding environment.
             </p>
@@ -61,8 +58,8 @@ function HomePage() {
                 'Real-time execution & feedback',
               ].map((feature, i) => (
                 <div key={i} className="flex items-center gap-3">
-                  <Check className="w-5 h-5 text-green-400 flex-shrink-0" />
-                  <span className="text-slate-300">{feature}</span>
+                  <Check className="w-5 h-5 flex-shrink-0" style={{ color: 'var(--success)' }} />
+                  <span className="transition-colors duration-200" style={{ color: 'var(--text-secondary)' }}>{feature}</span>
                 </div>
               ))}
             </div>
@@ -78,7 +75,7 @@ function HomePage() {
       </section>
 
       {/* STATS SECTION */}
-      <section className="border-y border-slate-800 bg-slate-900/50 mt-12">
+      <section className="mt-12 transition-colors duration-200" style={{ borderColor: 'var(--border)', borderTopWidth: '1px', borderBottomWidth: '1px', backgroundColor: 'color-mix(in srgb, var(--bg-surface) 50%, transparent)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 grid grid-cols-2 md:grid-cols-4 gap-8">
           {[
             { label: 'Active Users', value: '5K+' },
@@ -95,9 +92,9 @@ function HomePage() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
         <div className="text-center mb-16 space-y-4">
           <h2 className="text-4xl sm:text-5xl font-bold">
-            Designed for <span className="text-blue-400">developers</span>
+            Designed for <span style={{ color: 'var(--accent-bright)' }}>developers</span>
           </h2>
-          <p className="text-lg text-slate-400 max-w-2xl mx-auto">
+          <p className="text-lg max-w-2xl mx-auto transition-colors duration-200" style={{ color: 'var(--text-secondary)' }}>
             Professional tools that make interview prep productive and collaborative
           </p>
         </div>
@@ -137,22 +134,23 @@ function HomePage() {
           ].map((feature, i) => (
             <div
               key={i}
-              className="bg-slate-900 border border-slate-800 rounded-xl p-8 hover:border-blue-500/50 transition-all duration-300 group"
+              className="rounded-xl p-8 transition-all duration-300 group border"
+              style={{ backgroundColor: 'var(--bg-surface)', borderColor: 'var(--border)' }}
             >
-              <div className="w-12 h-12 bg-blue-500/10 rounded-lg flex items-center justify-center mb-4 group-hover:bg-blue-500/20 transition-colors">
-                <feature.icon className="w-6 h-6 text-blue-400" />
+              <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4 transition-colors duration-200" style={{ backgroundColor: 'color-mix(in srgb, var(--accent-glow) 50%, transparent)' }}>
+                <feature.icon className="w-6 h-6" style={{ color: 'var(--accent)' }} />
               </div>
-              <h3 className="text-lg font-semibold mb-2 text-slate-100">{feature.title}</h3>
-              <p className="text-slate-400 text-sm leading-relaxed">{feature.description}</p>
+              <h3 className="text-lg font-semibold mb-2 transition-colors duration-200" style={{ color: 'var(--text-primary)' }}>{feature.title}</h3>
+              <p className="text-sm leading-relaxed transition-colors duration-200" style={{ color: 'var(--text-secondary)' }}>{feature.description}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* HOW IT WORKS */}
-      <section className="bg-slate-900/50 border-y border-slate-800">
+      <section className="transition-colors duration-200" style={{ backgroundColor: 'color-mix(in srgb, var(--bg-surface) 50%, transparent)', borderColor: 'var(--border)', borderTopWidth: '1px', borderBottomWidth: '1px' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-          <h2 className="text-4xl font-bold text-center mb-16">How it works</h2>
+          <h2 className="text-4xl font-bold text-center mb-16 transition-colors duration-200" style={{ color: 'var(--text-primary)' }}>How it works</h2>
 
           <div className="space-y-8 max-w-3xl mx-auto">
             {[
@@ -178,10 +176,10 @@ function HomePage() {
               },
             ].map((item, i) => (
               <div key={i} className="flex gap-8 items-start">
-                <div className="text-4xl font-bold text-blue-400/30 flex-shrink-0">{item.step}</div>
+                <div className="text-4xl font-bold flex-shrink-0 transition-colors duration-200" style={{ color: 'color-mix(in srgb, var(--accent) 30%, transparent)' }}>{item.step}</div>
                 <div>
-                  <h3 className="text-xl font-semibold mb-2 text-slate-100">{item.title}</h3>
-                  <p className="text-slate-400">{item.description}</p>
+                  <h3 className="text-xl font-semibold mb-2 transition-colors duration-200" style={{ color: 'var(--text-primary)' }}>{item.title}</h3>
+                  <p className="transition-colors duration-200" style={{ color: 'var(--text-secondary)' }}>{item.description}</p>
                 </div>
               </div>
             ))}
@@ -191,23 +189,24 @@ function HomePage() {
 
       {/* FINAL CTA */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-        <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-2xl p-12 sm:p-16 text-center">
-          <h2 className="text-4xl sm:text-5xl font-bold mb-4">Ready to ace your interviews?</h2>
-          <p className="text-xl text-slate-400 mb-8 max-w-2xl mx-auto">
+        <div className="rounded-2xl p-12 sm:p-16 text-center border transition-colors duration-200" style={{ backgroundColor: 'color-mix(in srgb, var(--accent-dim) 50%, transparent)', borderColor: 'var(--border-accent)' }}>
+          <h2 className="text-4xl sm:text-5xl font-bold mb-4 transition-colors duration-200" style={{ color: 'var(--text-primary)' }}>Ready to ace your interviews?</h2>
+          <p className="text-xl mb-8 max-w-2xl mx-auto transition-colors duration-200" style={{ color: 'var(--text-secondary)' }}>
             Join thousands of developers preparing for technical interviews with confidence
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
             {isSignedIn ? (
               <button
                 onClick={handleGetStartedNow}
-                className="px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold rounded-lg hover:shadow-lg hover:shadow-blue-500/50 transition-all duration-300 hover:scale-105 flex items-center gap-2"
+                className="px-8 py-3 text-black font-semibold rounded-lg hover:shadow-lg transition-all duration-300 hover:scale-105 flex items-center gap-2"
+                style={{ background: 'var(--gradient-gold)', boxShadow: `0 4px 20px var(--accent-glow)` }}
               >
                 Get Started Now
                 <ArrowRight className="w-4 h-4" />
               </button>
             ) : (
               <SignUpButton mode="modal">
-                <button className="px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold rounded-lg hover:shadow-lg hover:shadow-blue-500/50 transition-all duration-300 hover:scale-105 flex items-center gap-2">
+                <button className="px-8 py-3 text-black font-semibold rounded-lg hover:shadow-lg transition-all duration-300 hover:scale-105 flex items-center gap-2" style={{ background: 'var(--gradient-gold)', boxShadow: `0 4px 20px var(--accent-glow)` }}>
                   Get Started Now
                   <ArrowRight className="w-4 h-4" />
                 </button>
@@ -218,9 +217,9 @@ function HomePage() {
       </section>
 
       {/* FOOTER */}
-      <footer className="border-t border-slate-800 bg-slate-900/50">
+      <footer className="transition-colors duration-200" style={{ borderColor: 'var(--border)', borderTopWidth: '1px', backgroundColor: 'color-mix(in srgb, var(--bg-surface) 50%, transparent)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="border-slate-800 flex flex-col sm:flex-row justify-center items-center text-sm text-slate-400">
+          <div className="flex flex-col sm:flex-row justify-center items-center text-sm transition-colors duration-200" style={{ color: 'var(--text-muted)' }}>
             <p>&copy; 2026 InterviewIQ by Neel Lokhandwala. All rights reserved.</p>
           </div>
         </div>
