@@ -25,7 +25,7 @@ export default function Navbar() {
       }`}
     >
       {/* Glassmorphism bar */}
-      <div className="mx-4 mt-3 rounded-2xl backdrop-blur-2xl shadow-xl transition-colors duration-200" style={{ backgroundColor: 'color-mix(in srgb, var(--bg-surface) 70%, transparent)', borderColor: 'var(--border)', borderWidth: '1px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.3)' }}>
+      <div className="mx-4 mt-3 rounded-2xl backdrop-blur-2xl shadow-xl transition-colors duration-200 border" style={{ backgroundColor: theme === 'light' ? 'var(--bg-elevated)' : 'color-mix(in srgb, var(--bg-surface) 70%, transparent)', borderColor: 'var(--border)', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.15)' }}>
         {/* Top glow line */}
         <div className="absolute inset-x-0 top-0 h-px rounded-t-2xl" style={{ background: 'linear-gradient(to right, transparent, var(--accent-bright) 50%, transparent)' }} />
 

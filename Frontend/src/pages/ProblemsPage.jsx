@@ -200,11 +200,8 @@ const ProblemsPage = () => {
             <Zap className="w-4 h-4" style={{ color: 'var(--success)' }} />
             <span className="text-sm transition-colors duration-200" style={{ color: 'var(--text-secondary)' }}>15 Curated Problems</span>
           </div>
-          <h1 className="text-5xl sm:text-6xl font-bold">
-            <span style={{ color: 'var(--text-primary)' }}>Practice </span>
-            <span className="text-transparent bg-clip-text" style={{ backgroundImage: 'linear-gradient(to right, var(--accent-bright), var(--accent), var(--accent-bright))' }}>
-              Coding Problems
-            </span>
+          <h1 className="text-5xl sm:text-6xl font-bold" style={{ color: 'var(--text-primary)' }}>
+            Practice Coding Problems
           </h1>
           <p className="text-xl max-w-2xl transition-colors duration-200" style={{ color: 'var(--text-secondary)' }}>
             Sharpen your coding skills with these curated problems. Master algorithms and data structures one problem at a time.

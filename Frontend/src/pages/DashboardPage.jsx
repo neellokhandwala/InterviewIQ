@@ -329,27 +329,28 @@ const DashboardPage = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {pastSessions.map((session) => (
                 <div key={session._id}
-                  className="group relative overflow-hidden rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-slate-700 transition-all duration-300 hover:shadow-xl hover:shadow-black/30 backdrop-blur-sm">
-                  <div className="absolute left-0 top-4 bottom-4 w-0.5 bg-gradient-to-b from-blue-500/0 via-blue-500/40 to-blue-500/0 rounded-full" />
+                  className="group relative overflow-hidden rounded-2xl border transition-all duration-300 hover:shadow-xl backdrop-blur-sm"
+                  style={{ backgroundColor: 'var(--bg-surface)', borderColor: 'var(--border)' }}>
+                  <div className="absolute left-0 top-4 bottom-4 w-0.5 rounded-full" style={{ background: 'linear-gradient(to bottom, rgba(217,119,6,0), rgba(217,119,6,0.4), rgba(217,119,6,0))' }} />
 
                   <div className="p-5 pl-6">
                     <div className="mb-3">
-                      <h3 className="font-bold text-slate-100 mb-2 group-hover:text-blue-300 transition-colors">{session.problem}</h3>
-                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${diffColor(session.difficulty)}`}>
+                      <h3 className="font-bold mb-2 transition-colors duration-200" style={{ color: 'var(--text-primary)' }}>{session.problem}</h3>
+                      <span className="text-xs font-semibold px-2 py-0.5 rounded-full border transition-colors duration-200" style={{ ...diffColor(session.difficulty), borderWidth: '1px', borderStyle: 'solid' }}>
                         {session.difficulty.charAt(0).toUpperCase() + session.difficulty.slice(1)}
                       </span>
                     </div>
 
                     <div className="space-y-2 mb-4">
-                      <div className="flex items-center gap-2 text-xs text-slate-400">
-                        <Clock className="w-3.5 h-3.5 text-blue-400" />
+                      <div className="flex items-center gap-2 text-xs transition-colors duration-200" style={{ color: 'var(--text-secondary)' }}>
+                        <Clock className="w-3.5 h-3.5" style={{ color: 'var(--accent)' }} />
                         Completed
                       </div>
-                      <div className="flex items-center gap-2 text-xs text-slate-400">
-                        <Users className="w-3.5 h-3.5 text-blue-400" />
+                      <div className="flex items-center gap-2 text-xs transition-colors duration-200" style={{ color: 'var(--text-secondary)' }}>
+                        <Users className="w-3.5 h-3.5" style={{ color: 'var(--accent)' }} />
                         {session.participant ? '2' : '1'} participant{(session.participant ? 2 : 1) !== 1 ? 's' : ''}
                       </div>
-                      <div className="flex items-center gap-2 text-xs text-slate-600">
+                      <div className="flex items-center gap-2 text-xs transition-colors duration-200" style={{ color: 'var(--text-muted)' }}>
                         <Calendar className="w-3.5 h-3.5" />
                         {formatTimeAgo(new Date(session.updatedAt))}
                       </div>
@@ -357,7 +358,8 @@ const DashboardPage = () => {
 
                     <button 
                       onClick={() => setDetailSession(session)}
-                      className="w-full py-2 rounded-xl text-xs font-semibold text-slate-400 bg-slate-800/60 hover:bg-slate-800 hover:text-slate-200 transition-all duration-200 flex items-center justify-center gap-1.5">
+                      className="w-full py-2 rounded-xl text-xs font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 border"
+                      style={{ backgroundColor: 'var(--bg-elevated)', borderColor: 'var(--border)', color: 'var(--text-secondary)' }}>
                       <Code2 className="w-3.5 h-3.5" /> View Details
                     </button>
                   </div>
@@ -365,12 +367,12 @@ const DashboardPage = () => {
               ))}
             </div>
           ) : (
-            <div className="rounded-2xl bg-slate-900/40 border border-slate-800 border-dashed p-12 text-center">
-              <div className="w-12 h-12 rounded-xl bg-slate-800/80 flex items-center justify-center mx-auto mb-3">
-                <Calendar className="w-6 h-6 text-slate-600" />
+            <div className="rounded-2xl border border-dashed p-12 text-center transition-colors duration-200" style={{ backgroundColor: 'color-mix(in srgb, var(--bg-elevated) 40%, transparent)', borderColor: 'var(--border)' }}>
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3 transition-colors duration-200" style={{ backgroundColor: 'var(--bg-muted)', color: 'var(--text-muted)' }}>
+                <Calendar className="w-6 h-6" />
               </div>
-              <p className="text-slate-400 font-medium mb-1">No past sessions yet</p>
-              <p className="text-sm text-slate-600">Completed sessions will appear here</p>
+              <p className="font-medium mb-1 transition-colors duration-200" style={{ color: 'var(--text-secondary)' }}>No past sessions yet</p>
+              <p className="text-sm transition-colors duration-200" style={{ color: 'var(--text-muted)' }}>Completed sessions will appear here</p>
             </div>
           )}
         </section>
@@ -379,36 +381,52 @@ const DashboardPage = () => {
       {/* ── CREATE SESSION MODAL ── */}
       {showCreateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="w-full max-w-2xl rounded-2xl bg-slate-900 border border-slate-700/60 shadow-2xl shadow-black/60 overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
+          <div className="w-full max-w-2xl rounded-2xl border shadow-2xl overflow-hidden animate-in slide-in-from-bottom-4 duration-300 transition-colors" style={{ backgroundColor: 'var(--bg-surface)', borderColor: 'var(--border)' }}>
 
             {/* Modal header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800">
+            <div className="flex items-center justify-between px-6 py-4 border-b transition-colors duration-200" style={{ borderColor: 'var(--border)' }}>
               <div>
-                <h2 className="text-lg font-bold text-slate-100">Create New Session</h2>
-                <p className="text-xs text-slate-500 mt-0.5">Pick a problem to start your interview</p>
+                <h2 className="text-lg font-bold transition-colors duration-200" style={{ color: 'var(--text-primary)' }}>Create New Session</h2>
+                <p className="text-xs mt-0.5 transition-colors duration-200" style={{ color: 'var(--text-muted)' }}>Pick a problem to start your interview</p>
               </div>
               <button onClick={() => { setShowCreateModal(false); setSelectedProblem(null) }}
-                className="p-2 rounded-lg hover:bg-slate-800 text-slate-500 hover:text-slate-200 transition-all">
+                className="p-2 rounded-lg transition-all duration-200"
+                style={{ color: 'var(--text-muted)', backgroundColor: 'transparent' }}>
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             {/* Difficulty filter */}
             <div className="flex items-center gap-2 px-6 pt-4">
-              {['All', 'Easy', 'Medium', 'Hard'].map(d => (
-                <button key={d} onClick={() => setFilterDifficulty(d)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 border ${
-                    filterDifficulty === d
-                      ? d === 'All'     ? 'bg-blue-500/20 text-blue-400 border-blue-500/40'
-                      : d === 'Easy'    ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40'
-                      : d === 'Medium'  ? 'bg-amber-500/20 text-amber-400 border-amber-500/40'
-                                        : 'bg-red-500/20 text-red-400 border-red-500/40'
-                      : 'bg-slate-800/60 text-slate-400 border-slate-700/40 hover:border-slate-600'
-                  }`}>
-                  {d}
-                </button>
-              ))}
-              <span className="ml-auto text-xs text-slate-600">{filtered.length} problems</span>
+              {['All', 'Easy', 'Medium', 'Hard'].map(d => {
+                let bgColor, textColor, borderColor;
+                if (filterDifficulty === d) {
+                  bgColor = d === 'All' ? 'color-mix(in srgb, var(--accent) 12%, transparent)'
+                         : d === 'Easy' ? 'rgba(101, 163, 13, 0.12)'
+                         : d === 'Medium' ? 'rgba(217, 119, 6, 0.12)'
+                         : 'rgba(220, 38, 38, 0.12)';
+                  textColor = d === 'All' ? 'var(--accent)'
+                           : d === 'Easy' ? '#65A30D'
+                           : d === 'Medium' ? '#D97706'
+                           : '#DC2626';
+                  borderColor = d === 'All' ? 'var(--border-accent)'
+                             : d === 'Easy' ? 'rgba(101, 163, 13, 0.25)'
+                             : d === 'Medium' ? 'rgba(217, 119, 6, 0.25)'
+                             : 'rgba(220, 38, 38, 0.25)';
+                } else {
+                  bgColor = 'var(--bg-elevated)';
+                  textColor = 'var(--text-secondary)';
+                  borderColor = 'var(--border)';
+                }
+                return (
+                  <button key={d} onClick={() => setFilterDifficulty(d)}
+                    className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 border"
+                    style={{ backgroundColor: bgColor, color: textColor, borderColor: borderColor }}>
+                    {d}
+                  </button>
+                );
+              })}
+              <span className="ml-auto text-xs transition-colors duration-200" style={{ color: 'var(--text-muted)' }}>{filtered.length} problems</span>
             </div>
 
             {/* Problem list */}
@@ -418,19 +436,19 @@ const DashboardPage = () => {
                   const isSelected = selectedProblem?.id === problem.id
                   return (
                     <button key={problem.id} onClick={() => setSelectedProblem(problem)}
-                      className={`group relative p-3.5 rounded-xl text-left transition-all duration-200 border ${
-                        isSelected
-                          ? 'bg-blue-500/10 border-blue-500/50 ring-1 ring-blue-500/30'
-                          : 'bg-slate-800/40 border-slate-700/40 hover:border-slate-600 hover:bg-slate-800/60'
-                      }`}>
+                      className="group relative p-3.5 rounded-xl text-left transition-all duration-200 border"
+                      style={{
+                        backgroundColor: isSelected ? 'color-mix(in srgb, var(--accent) 10%, transparent)' : 'var(--bg-elevated)',
+                        borderColor: isSelected ? 'var(--border-accent)' : 'var(--border)'
+                      }}>
                       <div className="flex items-center justify-between mb-1.5">
-                        <span className="text-sm font-semibold text-slate-100 truncate pr-2">{problem.title}</span>
+                        <span className="text-sm font-semibold truncate pr-2 transition-colors duration-200" style={{ color: 'var(--text-primary)' }}>{problem.title}</span>
                         {isSelected
-                          ? <Check className="w-4 h-4 text-blue-400 shrink-0" />
-                          : <ChevronRight className="w-3.5 h-3.5 text-slate-600 group-hover:text-slate-400 shrink-0 transition-colors" />
+                          ? <Check className="w-4 h-4 shrink-0" style={{ color: 'var(--accent)' }} />
+                          : <ChevronRight className="w-3.5 h-3.5 shrink-0 transition-colors duration-200" style={{ color: 'var(--text-muted)' }} />
                         }
                       </div>
-                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${diffColor(problem.difficulty)}`}>
+                      <span className="text-xs font-semibold px-2 py-0.5 rounded-full border transition-colors duration-200" style={{ ...diffColor(problem.difficulty), borderWidth: '1px', borderStyle: 'solid' }}>
                         {problem.difficulty}
                       </span>
                     </button>
@@ -441,23 +459,23 @@ const DashboardPage = () => {
 
             {/* Selected summary */}
             {selectedProblem && (
-              <div className="mx-6 mb-4 p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/20">
+              <div className="mx-6 mb-4 p-4 rounded-xl border transition-colors duration-200" style={{ backgroundColor: 'color-mix(in srgb, var(--success) 10%, transparent)', borderColor: 'var(--success)' }}>
                 <div className="flex items-center gap-2 mb-2">
-                  <Target className="w-4 h-4 text-emerald-400" />
-                  <span className="text-sm font-semibold text-slate-200">Session Summary</span>
+                  <Target className="w-4 h-4" style={{ color: 'var(--success)' }} />
+                  <span className="text-sm font-semibold transition-colors duration-200" style={{ color: 'var(--text-primary)' }}>Session Summary</span>
                 </div>
                 <div className="grid grid-cols-3 gap-4 text-xs">
                   <div>
-                    <p className="text-slate-500 mb-0.5">Problem</p>
-                    <p className="text-emerald-400 font-semibold truncate">{selectedProblem.title}</p>
+                    <p className="mb-0.5 transition-colors duration-200" style={{ color: 'var(--text-muted)' }}>Problem</p>
+                    <p className="font-semibold truncate transition-colors duration-200" style={{ color: 'var(--accent)' }}>{selectedProblem.title}</p>
                   </div>
                   <div>
-                    <p className="text-slate-500 mb-0.5">Difficulty</p>
-                    <p className="text-slate-300 font-semibold">{selectedProblem.difficulty}</p>
+                    <p className="mb-0.5 transition-colors duration-200" style={{ color: 'var(--text-muted)' }}>Difficulty</p>
+                    <p className="font-semibold transition-colors duration-200" style={{ color: 'var(--text-secondary)' }}>{selectedProblem.difficulty}</p>
                   </div>
                   <div>
-                    <p className="text-slate-500 mb-0.5">Max Players</p>
-                    <p className="text-slate-300 font-semibold">2 (1v1)</p>
+                    <p className="mb-0.5 transition-colors duration-200" style={{ color: 'var(--text-muted)' }}>Max Players</p>
+                    <p className="font-semibold transition-colors duration-200" style={{ color: 'var(--text-secondary)' }}>2 (1v1)</p>
                   </div>
                 </div>
               </div>
@@ -466,20 +484,21 @@ const DashboardPage = () => {
             {/* Modal footer */}
             <div className="flex gap-3 px-6 pb-6">
               <button onClick={() => { setShowCreateModal(false); setSelectedProblem(null) }}
-                className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-slate-400 bg-slate-800/60 hover:bg-slate-800 border border-slate-700/40 transition-all">
+                className="flex-1 py-2.5 rounded-xl text-sm font-semibold border transition-all duration-200"
+                style={{ backgroundColor: 'var(--bg-elevated)', borderColor: 'var(--border)', color: 'var(--text-secondary)' }}>
                 Cancel
               </button>
               <button onClick={handleCreateSession} disabled={!selectedProblem || isCreating}
-                className={`relative group flex-1 py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 overflow-hidden transition-all duration-300 ${
-                  selectedProblem && !isCreating
-                    ? 'text-white hover:shadow-lg hover:shadow-emerald-500/30 hover:scale-[1.02] active:scale-95'
-                    : 'bg-slate-700/50 text-slate-500 cursor-not-allowed'
-                }`}>
+                className="relative group flex-1 py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 overflow-hidden transition-all duration-300"
+                style={{
+                  background: (selectedProblem && !isCreating) ? 'linear-gradient(135deg, #65A30D, #84CC16)' : 'var(--bg-muted)',
+                  color: (selectedProblem && !isCreating) ? '#000' : 'var(--text-muted)',
+                  cursor: (selectedProblem && !isCreating) ? 'pointer' : 'not-allowed',
+                  opacity: (selectedProblem && !isCreating) ? '1' : '0.6',
+                  boxShadow: (selectedProblem && !isCreating) ? '0 4px 20px rgba(101, 163, 13, 0.15)' : 'none'
+                }}>
                 {selectedProblem && !isCreating && (
-                  <>
-                    <span className="absolute inset-0 bg-gradient-to-r from-emerald-500 to-teal-500" />
-                    <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
-                  </>
+                  <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
                 )}
                 <span className="relative flex items-center gap-2">
                   {isCreating
@@ -495,41 +514,43 @@ const DashboardPage = () => {
       {/* ── SESSION DETAIL MODAL ── */}
       {detailSession && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="w-full max-w-sm rounded-2xl bg-slate-900 border border-slate-700/60 shadow-2xl shadow-black/60 overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800">
-              <h2 className="text-base font-bold text-slate-100">Session Details</h2>
+          <div className="w-full max-w-sm rounded-2xl border shadow-2xl overflow-hidden animate-in slide-in-from-bottom-4 duration-300 transition-colors" style={{ backgroundColor: 'var(--bg-surface)', borderColor: 'var(--border)' }}>
+            <div className="flex items-center justify-between px-6 py-4 border-b transition-colors duration-200" style={{ borderColor: 'var(--border)' }}>
+              <h2 className="text-base font-bold transition-colors duration-200" style={{ color: 'var(--text-primary)' }}>Session Details</h2>
               <button onClick={() => setDetailSession(null)}
-                className="p-2 rounded-lg hover:bg-slate-800 text-slate-500 hover:text-slate-200 transition-all">
+                className="p-2 rounded-lg transition-all duration-200"
+                style={{ color: 'var(--text-muted)', backgroundColor: 'transparent' }}>
                 <X className="w-4 h-4" />
               </button>
             </div>
             <div className="p-6 space-y-4">
               <div>
-                <p className="text-xs text-slate-500 mb-1">Problem</p>
-                <p className="text-sm font-semibold text-slate-100">{detailSession.problem}</p>
+                <p className="text-xs mb-1 transition-colors duration-200" style={{ color: 'var(--text-muted)' }}>Problem</p>
+                <p className="text-sm font-semibold transition-colors duration-200" style={{ color: 'var(--text-primary)' }}>{detailSession.problem}</p>
               </div>
               <div>
-                <p className="text-xs text-slate-500 mb-1">Difficulty</p>
-                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${diffColor(detailSession.difficulty)}`}>
+                <p className="text-xs mb-1 transition-colors duration-200" style={{ color: 'var(--text-muted)' }}>Difficulty</p>
+                <span className="text-xs font-semibold px-2 py-0.5 rounded-full border transition-colors duration-200" style={{ ...diffColor(detailSession.difficulty), borderWidth: '1px', borderStyle: 'solid' }}>
                   {detailSession.difficulty.charAt(0).toUpperCase() + detailSession.difficulty.slice(1)}
                 </span>
               </div>
               <div>
-                <p className="text-xs text-slate-500 mb-1">Created</p>
-                <p className="text-sm text-slate-300">{new Date(detailSession.createdAt).toLocaleString()}</p>
+                <p className="text-xs mb-1 transition-colors duration-200" style={{ color: 'var(--text-muted)' }}>Created</p>
+                <p className="text-sm transition-colors duration-200" style={{ color: 'var(--text-secondary)' }}>{new Date(detailSession.createdAt).toLocaleString()}</p>
               </div>
               <div>
-                <p className="text-xs text-slate-500 mb-1">Duration</p>
-                <p className="text-sm text-slate-300">{formatDuration(detailSession.createdAt, detailSession.updatedAt)}</p>
+                <p className="text-xs mb-1 transition-colors duration-200" style={{ color: 'var(--text-muted)' }}>Duration</p>
+                <p className="text-sm transition-colors duration-200" style={{ color: 'var(--text-secondary)' }}>{formatDuration(detailSession.createdAt, detailSession.updatedAt)}</p>
               </div>
               <div>
-                <p className="text-xs text-slate-500 mb-1">Participants</p>
-                <p className="text-sm text-slate-300">{detailSession.participant ? '2 participants' : '1 participant'}</p>
+                <p className="text-xs mb-1 transition-colors duration-200" style={{ color: 'var(--text-muted)' }}>Participants</p>
+                <p className="text-sm transition-colors duration-200" style={{ color: 'var(--text-secondary)' }}>{detailSession.participant ? '2 participants' : '1 participant'}</p>
               </div>
             </div>
             <div className="px-6 pb-6">
               <button onClick={() => setDetailSession(null)}
-                className="w-full py-2.5 rounded-xl text-sm font-semibold text-slate-400 bg-slate-800/60 hover:bg-slate-800 border border-slate-700/40 transition-all">
+                className="w-full py-2.5 rounded-xl text-sm font-semibold border transition-all duration-200"
+                style={{ backgroundColor: 'var(--bg-elevated)', borderColor: 'var(--border)', color: 'var(--text-secondary)' }}>
                 Close
               </button>
             </div>
@@ -537,7 +558,7 @@ const DashboardPage = () => {
         </div>
       )}
       {/* FOOTER */}
-        <footer className="border-t border-slate-800 bg-slate-900/50">
+        <footer className="border-t transition-colors duration-200" style={{ borderColor: 'var(--border)', backgroundColor: 'color-mix(in srgb, var(--bg-surface) 50%, transparent)' }}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div className="border-slate-800 flex flex-col sm:flex-row justify-center items-center text-sm text-slate-400">
                <p>&copy; 2026 InterviewIQ by Neel Lokhandwala. All rights reserved.</p>

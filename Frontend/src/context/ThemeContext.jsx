@@ -3,11 +3,11 @@ import { createContext, useContext, useEffect, useState } from 'react';
 const ThemeContext = createContext();
 
 export function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState('dark');
+  const [theme, setTheme] = useState('light');
 
   useEffect(() => {
-    // Load saved theme preference
-    const savedTheme = localStorage.getItem('iq-theme') || 'dark';
+    // Load saved theme preference, default to light
+    const savedTheme = localStorage.getItem('iq-theme') || 'light';
     setTheme(savedTheme);
     applyTheme(savedTheme);
   }, []);

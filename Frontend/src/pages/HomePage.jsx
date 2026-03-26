@@ -41,11 +41,8 @@ function HomePage() {
               <span className="text-sm transition-colors duration-200" style={{ color: 'var(--text-secondary)' }}>Interview at your pace</span>
             </div>
 
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold leading-tight">
-              <span style={{ color: 'var(--text-primary)' }}>Master coding </span>
-              <span className="text-transparent bg-clip-text" style={{ backgroundImage: 'var(--gradient-gold)' }}>
-                interviews together
-              </span>
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold leading-tight" style={{ color: 'var(--text-primary)' }}>
+              Master coding interviews together
             </h1>
 
             <p className="text-xl leading-relaxed max-w-lg transition-colors duration-200" style={{ color: 'var(--text-secondary)' }}>
