@@ -560,7 +560,7 @@ const DashboardPage = () => {
       {/* FOOTER */}
         <footer className="border-t transition-colors duration-200" style={{ borderColor: 'var(--border)', backgroundColor: 'color-mix(in srgb, var(--bg-surface) 50%, transparent)' }}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <div className="border-slate-800 flex flex-col sm:flex-row justify-center items-center text-sm text-slate-400">
+            <div className="flex flex-col sm:flex-row justify-center items-center text-sm transition-colors duration-200" style={{ color: 'var(--text-muted)' }}>
                <p>&copy; 2026 InterviewIQ by Neel Lokhandwala. All rights reserved.</p>
             </div>
           </div>

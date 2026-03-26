@@ -137,12 +137,14 @@ export default function ProblemDetailPage() {
       <div className="fixed bottom-6 right-6 lg:hidden z-50">
         {!isMobileEditorOpen ? (
           <button onClick={() => setIsMobileEditorOpen(true)}
-            className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-semibold rounded-xl shadow-xl shadow-blue-500/30 hover:scale-105 transition-all">
+            className="flex items-center gap-2 px-5 py-3 text-black font-semibold rounded-xl hover:scale-105 transition-all"
+            style={{ background: 'var(--gradient-gold)', boxShadow: '0 4px 20px var(--accent-glow)' }}>
             <Code2 className="w-4 h-4" /> Open Editor
           </button>
         ) : (
           <button onClick={() => setIsMobileEditorOpen(false)}
-            className="flex items-center gap-2 px-5 py-3 bg-slate-800 text-slate-300 font-semibold rounded-xl border border-slate-700 hover:scale-105 transition-all">
+            className="flex items-center gap-2 px-5 py-3 font-semibold rounded-xl border transition-all"
+            style={{ backgroundColor: 'var(--bg-elevated)', borderColor: 'var(--border)', color: 'var(--text-secondary)' }}>
             <BookOpen className="w-4 h-4" /> View Problem
           </button>
         )}
@@ -156,29 +158,32 @@ export default function ProblemDetailPage() {
 
             {/* LEFT PANEL */}
             <Panel defaultSize={42} minSize={28} maxSize={60}>
-              <div className="h-full flex flex-col border-r border-slate-800 bg-slate-950">
+              <div className="h-full flex flex-col transition-colors duration-200" style={{ backgroundColor: 'var(--bg-base)', borderRight: `1px solid var(--border)` }}>
 
-                <div className="px-5 pt-4 pb-3 border-b border-slate-800 space-y-2 shrink-0 relative">
+                <div className="px-5 pt-4 pb-3 space-y-2 shrink-0 relative transition-colors duration-200" style={{ borderBottom: `1px solid var(--border)` }}>
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-xs text-slate-500">
+                    <div className="flex items-center gap-2 text-xs transition-colors duration-200" style={{ color: 'var(--text-muted)' }}>
                       <span onClick={() => navigate('/problems')}
-                        className="hover:text-blue-400 cursor-pointer transition-colors">Problems</span>
+                        className="cursor-pointer transition-colors duration-200" style={{ color: 'var(--text-muted)' }} onMouseEnter={(e) => e.target.style.color = 'var(--accent)'} onMouseLeave={(e) => e.target.style.color = 'var(--text-muted)'}>Problems</span>
                       <ChevronRight className="w-3 h-3" />
-                      <span className="text-slate-300">#{problem.id} {problem.title}</span>
+                      <span style={{ color: 'var(--text-secondary)' }}>#{problem.id} {problem.title}</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <button onClick={() => prevProblem && navigate(`/problems/${prevProblem.id}`)}
                         disabled={!prevProblem}
-                        className="p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-slate-200 disabled:opacity-30 transition-all">
+                        className="p-1.5 rounded-lg disabled:opacity-30 transition-all"
+                        style={{ backgroundColor: 'transparent', color: 'var(--text-muted)' }}>
                         <ChevronLeft className="w-4 h-4" />
                       </button>
                       <button onClick={() => setShowProblemList(!showProblemList)}
-                        className="p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition-all">
+                        className="p-1.5 rounded-lg transition-all"
+                        style={{ backgroundColor: 'transparent', color: 'var(--text-muted)' }}>
                         <List className="w-4 h-4" />
                       </button>
                       <button onClick={() => nextProblem && navigate(`/problems/${nextProblem.id}`)}
                         disabled={!nextProblem}
-                        className="p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-slate-200 disabled:opacity-30 transition-all">
+                        className="p-1.5 rounded-lg disabled:opacity-30 transition-all"
+                        style={{ backgroundColor: 'transparent', color: 'var(--text-muted)' }}>
                         <ChevronRight className="w-4 h-4" />
                       </button>
                     </div>
@@ -186,28 +191,29 @@ export default function ProblemDetailPage() {
 
                   {/* Problem list dropdown */}
                   {showProblemList && (
-                    <div className="absolute left-0 top-full mt-1 w-72 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl shadow-black/50 z-50 max-h-80 overflow-y-auto">
+                    <div className="absolute left-0 top-full mt-1 w-72 rounded-xl shadow-2xl z-50 max-h-80 overflow-y-auto transition-colors duration-200" style={{ backgroundColor: 'var(--bg-surface)', borderColor: 'var(--border)', borderWidth: '1px' }}>
                       {allProblems.map((p) => (
                         <button key={p.id}
                           onClick={() => { navigate(`/problems/${p.id}`); setShowProblemList(false); }}
-                          className={`w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-slate-800 transition-colors text-sm ${p.id === problem.id ? 'bg-slate-800' : ''}`}>
-                          <span className="text-slate-500 w-5 text-xs">#{p.id}</span>
-                          <span className="flex-1 text-slate-200">{p.title}</span>
-                          <span className={`text-xs px-2 py-0.5 rounded-full border ${getDifficultyColor(p.difficulty)}`}>{p.difficulty}</span>
+                          className="w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors text-sm"
+                          style={{ backgroundColor: p.id === problem.id ? 'var(--bg-elevated)' : 'transparent', color: 'var(--text-primary)' }}>
+                          <span style={{ color: 'var(--text-muted)' }} className="w-5 text-xs">#{p.id}</span>
+                          <span className="flex-1">{p.title}</span>
+                          <span className="text-xs px-2 py-0.5 rounded-full border transition-colors duration-200" style={{ ...getDifficultyColor(p.difficulty), borderWidth: '1px', borderStyle: 'solid' }}>{p.difficulty}</span>
                         </button>
                       ))}
                     </div>
                   )}
 
-                  <h1 className="text-xl font-bold text-slate-100">{problem.title}</h1>
+                  <h1 className="text-xl font-bold transition-colors duration-200" style={{ color: 'var(--text-primary)' }}>{problem.title}</h1>
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className={`px-2.5 py-0.5 rounded-full border text-xs font-semibold ${getDifficultyColor(problem.difficulty)}`}>
+                    <span className="px-2.5 py-0.5 rounded-full border text-xs font-semibold transition-colors duration-200" style={{ ...getDifficultyColor(problem.difficulty), borderWidth: '1px', borderStyle: 'solid' }}>
                       {problem.difficulty}
                     </span>
-                    <span className="px-2.5 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-xs text-slate-300">
+                    <span className="px-2.5 py-0.5 rounded-full border text-xs transition-colors duration-200" style={{ backgroundColor: 'var(--bg-elevated)', borderColor: 'var(--border)', color: 'var(--text-secondary)' }}>
                       {problem.category}
                     </span>
-                    <div className="flex items-center gap-3 text-xs text-slate-500 ml-auto">
+                    <div className="flex items-center gap-3 text-xs ml-auto transition-colors duration-200" style={{ color: 'var(--text-muted)' }}>
                       <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{problem.timeLimit}</span>
                       <span className="flex items-center gap-1"><AlertCircle className="w-3 h-3" />{problem.memoryLimit}</span>
                     </div>
@@ -215,29 +221,61 @@ export default function ProblemDetailPage() {
                 </div>
 
                 {/* Tabs */}
-                <div className="flex border-b border-slate-800 px-3 shrink-0">
+                <div className="flex px-3 shrink-0 transition-colors duration-200" style={{ borderBottom: `1px solid var(--border)` }}>
                   {tabs.map(({ id: tabId, label, icon: Icon }) => (
                     <button key={tabId} onClick={() => setActiveTab(tabId)}
-                      className={`flex items-center gap-1.5 px-3 py-2.5 text-xs font-medium border-b-2 transition-all ${
-                        activeTab === tabId ? 'border-blue-500 text-blue-400' : 'border-transparent text-slate-400 hover:text-slate-200'
-                      }`}>
+                      className="flex items-center gap-1.5 px-3 py-2.5 text-xs font-medium border-b-2 transition-all duration-200"
+                      style={{
+                        borderBottomColor: activeTab === tabId ? 'var(--accent)' : 'transparent',
+                        color: activeTab === tabId ? 'var(--accent)' : 'var(--text-secondary)'
+                      }}>
                       <Icon className="w-3.5 h-3.5" />{label}
                     </button>
                   ))}
                 </div>
 
                 {/* Scrollable tab content */}
-                <div className="flex-1 overflow-y-auto p-5 space-y-4">
+                <div className="flex-1 overflow-y-auto p-5 space-y-4 transition-colors duration-200" style={{ color: 'var(--text-secondary)' }}>
                   {activeTab === 'description' && (
-                    <p className="text-slate-300 leading-relaxed text-sm">{problem.description}</p>
+                    <p className="leading-relaxed text-sm">{problem.description}</p>
                   )}
                   {activeTab === 'examples' && (
                     <div className="space-y-3">
                       {problem.examples.map((ex, i) => (
-                        <div key={i} className="rounded-xl border border-slate-800 bg-slate-900/40 overflow-hidden">
-                          <div className="px-4 py-2 bg-slate-800/60 border-b border-slate-800 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                            Example {i + 1}
+                        <div key={i} className="rounded-xl border overflow-hidden transition-colors duration-200" style={{ backgroundColor: 'var(--bg-elevated)', borderColor: 'var(--border)' }}>
+                          <div className="px-4 py-2 text-xs font-semibold uppercase tracking-wider transition-colors duration-200" style={{ backgroundColor: 'var(--bg-muted)', borderBottom: `1px solid var(--border)`, color: 'var(--text-muted)' }}>
+                            Example {i + 1}</div>
+                          <div className="p-4 space-y-2 font-mono text-xs">
+                            <div className="flex gap-2">
+                              <span className="font-bold w-16 shrink-0 transition-colors duration-200" style={{ color: 'var(--accent)' }}>Input:</span>
+                              <span className="transition-colors duration-200" style={{ color: 'var(--text-secondary)' }}>{ex.input}</span>
+                            </div>
+                            <div className="flex gap-2">
+                              <span className="font-bold w-16 shrink-0 transition-colors duration-200" style={{ color: 'var(--success)' }}>Output:</span>
+                              <span className="transition-colors duration-200" style={{ color: 'var(--text-secondary)' }}>{ex.output}</span>
+                            </div>
+                            {ex.explanation && (
+                              <div className="flex gap-2 pt-2 transition-colors duration-200" style={{ borderTop: `1px solid var(--border)` }}>
+                                <span className="font-bold w-16 shrink-0 transition-colors duration-200" style={{ color: 'var(--text-muted)' }}>Explain:</span>
+                                <span className="transition-colors duration-200" style={{ color: 'var(--text-muted)' }}>{ex.explanation}</span>
+                              </div>
+                            )}
                           </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {activeTab === 'constraints' && (
+                    <ul className="space-y-2">
+                      {problem.constraints.map((c, i) => (
+                        <li key={i} className="flex items-start gap-3 rounded-lg px-4 py-3 border transition-colors duration-200" style={{ backgroundColor: 'var(--bg-elevated)', borderColor: 'var(--border)' }}>
+                          <span className="font-bold mt-0.5 transition-colors duration-200" style={{ color: 'var(--accent)' }}>•</span>
+                          <code className="font-mono text-xs transition-colors duration-200" style={{ color: 'var(--text-secondary)' }}>{c}</code>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
                           <div className="p-4 space-y-2 font-mono text-xs">
                             <div className="flex gap-2">
                               <span className="text-blue-400 font-bold w-16 shrink-0">Input:</span>
@@ -272,7 +310,7 @@ export default function ProblemDetailPage() {
               </div>
             </Panel>
 
-            <PanelResizeHandle className="w-1.5 bg-slate-800 hover:bg-blue-500/50 transition-colors cursor-col-resize" />
+            <PanelResizeHandle className="w-1.5 transition-colors cursor-col-resize" style={{ backgroundColor: 'var(--border)' }} onMouseEnter={(e) => e.target.style.backgroundColor = 'var(--accent)'} onMouseLeave={(e) => e.target.style.backgroundColor = 'var(--border)'} />
 
             {/* RIGHT PANEL */}
             <Panel defaultSize={58} minSize={35}>
@@ -280,32 +318,41 @@ export default function ProblemDetailPage() {
 
                 {/* Code Editor */}
                 <Panel defaultSize={65} minSize={30}>
-                  <div className="h-full flex flex-col bg-slate-900">
-                    <div className="flex items-center justify-between px-4 py-2.5 bg-slate-950/80 border-b border-slate-800 shrink-0">
+                  <div className="h-full flex flex-col transition-colors duration-200" style={{ backgroundColor: 'var(--bg-surface)' }}>
+                    <div className="flex items-center justify-between px-4 py-2.5 shrink-0 transition-colors duration-200" style={{ backgroundColor: 'var(--bg-elevated)', borderBottom: `1px solid var(--border)` }}>
                       <div className="flex gap-1.5">
                         {languages.map((lang) => (
                           <button key={lang.id} onClick={() => handleLanguageChange(lang.id)}
-                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                              selectedLanguage === lang.id
-                                ? 'bg-blue-600 text-white shadow-md shadow-blue-500/30'
-                                : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-200'
-                            }`}>
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200"
+                            style={{
+                              backgroundColor: selectedLanguage === lang.id ? 'var(--accent)' : 'var(--bg-muted)',
+                              color: selectedLanguage === lang.id ? '#000' : 'var(--text-secondary)',
+                              boxShadow: selectedLanguage === lang.id ? `0 4px 12px var(--accent-glow)` : 'none'
+                            }}>
                             <span>{lang.icon}</span>{lang.name}
                           </button>
                         ))}
                       </div>
                       <div className="flex items-center gap-2">
                         <button onClick={handleCopy}
-                          className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 hover:text-slate-200 rounded-lg transition-all text-xs">
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all text-xs border"
+                          style={{ backgroundColor: 'var(--bg-muted)', borderColor: 'var(--border)', color: 'var(--text-secondary)' }}>
                           {copied
-                            ? <><Check className="w-3.5 h-3.5 text-green-400" /><span className="text-green-400">Copied!</span></>
+                            ? <><Check className="w-3.5 h-3.5" style={{ color: 'var(--success)' }} /><span style={{ color: 'var(--success)' }}>Copied!</span></>
                             : <><Copy className="w-3.5 h-3.5" /><span>Copy</span></>}
                         </button>
                         <button onClick={handleRunCode} disabled={isRunning}
-                          className="relative group flex items-center gap-2 px-4 py-1.5 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-semibold rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg hover:shadow-green-500/30 text-xs overflow-hidden">
-                          <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+                          className="relative group flex items-center gap-2 px-4 py-1.5 font-semibold rounded-lg transition-all text-xs overflow-hidden"
+                          style={{
+                            background: isRunning ? 'var(--bg-muted)' : 'var(--gradient-gold)',
+                            color: isRunning ? 'var(--text-muted)' : '#000',
+                            cursor: isRunning ? 'not-allowed' : 'pointer',
+                            opacity: isRunning ? '0.6' : '1',
+                            boxShadow: isRunning ? 'none' : `0 4px 12px var(--accent-glow)`
+                          }}>
+                          {!isRunning && <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />}
                           {isRunning
-                            ? <><div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />Running...</>
+                            ? <><div className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />Running...</>
                             : <><Play className="w-3.5 h-3.5" />Run Code</>}
                         </button>
                       </div>
@@ -338,20 +385,20 @@ export default function ProblemDetailPage() {
                   </div>
                 </Panel>
 
-                <PanelResizeHandle className="h-1.5 bg-slate-800 hover:bg-blue-500/50 transition-colors cursor-row-resize" />
+                <PanelResizeHandle className="h-1.5 transition-colors cursor-row-resize" style={{ backgroundColor: 'var(--border)' }} onMouseEnter={(e) => e.target.style.backgroundColor = 'var(--accent)'} onMouseLeave={(e) => e.target.style.backgroundColor = 'var(--border)'} />
 
                 {/* Output */}
                 <Panel defaultSize={35} minSize={15}>
-                  <div className="h-full flex flex-col bg-slate-950">
-                    <div className="flex items-center gap-2 px-4 py-2.5 border-b border-slate-800 shrink-0">
-                      <Terminal className="w-4 h-4 text-slate-400" />
-                      <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Output</span>
+                  <div className="h-full flex flex-col transition-colors duration-200" style={{ backgroundColor: 'var(--bg-base)' }}>
+                    <div className="flex items-center gap-2 px-4 py-2.5 shrink-0 transition-colors duration-200" style={{ borderBottom: `1px solid var(--border)`, color: 'var(--text-muted)' }}>
+                      <Terminal className="w-4 h-4" />
+                      <span className="text-xs font-semibold uppercase tracking-wider">Output</span>
                       {output && (
-                        <span className={`ml-auto flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border font-medium ${
-                          output.success
-                            ? 'bg-green-500/10 text-green-400 border-green-500/30'
-                            : 'bg-red-500/10 text-red-400 border-red-500/30'
-                        }`}>
+                        <span className="ml-auto flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border font-medium transition-colors duration-200" style={{
+                          backgroundColor: output.success ? 'rgba(101, 163, 13, 0.12)' : 'rgba(220, 38, 38, 0.12)',
+                          color: output.success ? '#65A30D' : '#DC2626',
+                          borderColor: output.success ? 'rgba(101, 163, 13, 0.25)' : 'rgba(220, 38, 38, 0.25)'
+                        }}>
                           {output.success
                             ? <><CheckCircle className="w-3 h-3" />All Passed</>
                             : <><XCircle className="w-3 h-3" />Failed</>}
@@ -360,12 +407,12 @@ export default function ProblemDetailPage() {
                     </div>
                     <div className="flex-1 overflow-auto p-4">
                       {output === null ? (
-                        <div className="h-full flex flex-col items-center justify-center gap-2 text-slate-600">
+                        <div className="h-full flex flex-col items-center justify-center gap-2 transition-colors duration-200" style={{ color: 'var(--text-muted)' }}>
                           <Terminal className="w-7 h-7" />
                           <p className="text-sm">Click "Run Code" to see output</p>
                         </div>
                       ) : (
-                        <pre className={`text-sm font-mono whitespace-pre-wrap leading-relaxed ${output.success ? 'text-green-400' : 'text-red-400'}`}>
+                        <pre className="text-sm font-mono whitespace-pre-wrap leading-relaxed transition-colors duration-200" style={{ color: output.success ? 'var(--success)' : 'var(--danger)' }}>
                           {output.text}
                         </pre>
                       )}
@@ -381,9 +428,9 @@ export default function ProblemDetailPage() {
         {/* ── MOBILE ── */}
         <div className="lg:hidden h-full">
           {!isMobileEditorOpen ? (
-            <div className="h-full overflow-y-auto bg-slate-950">
-              <div className="px-5 pt-4 pb-3 border-b border-slate-800 space-y-2">
-                <span onClick={() => navigate('/problems')} className="text-xs text-slate-500 hover:text-blue-400 cursor-pointer">← Back to Problems</span>
+            <div className="h-full overflow-y-auto transition-colors duration-200" style={{ backgroundColor: 'var(--bg-base)' }}>
+              <div className="px-5 pt-4 pb-3 space-y-2 transition-colors duration-200" style={{ borderBottom: `1px solid var(--border)` }}>
+                <span onClick={() => navigate('/problems')} className="text-xs cursor-pointer transition-colors duration-200" style={{ color: 'var(--text-muted)' }} onMouseEnter={(e) => e.target.style.color = 'var(--accent)'} onMouseLeave={(e) => e.target.style.color = 'var(--text-muted)'}>← Back to Problems</span>
                 <h1 className="text-xl font-bold">{problem.title}</h1>
                 <div className="flex gap-2">
                   <span className={`px-2.5 py-0.5 rounded-full border text-xs font-semibold ${getDifficultyColor(problem.difficulty)}`}>{problem.difficulty}</span>
