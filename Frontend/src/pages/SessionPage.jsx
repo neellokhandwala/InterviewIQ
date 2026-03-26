@@ -46,11 +46,14 @@ const languages = [
   { id: 'java',       name: 'Java',       icon: '☕', monacoLang: 'java'       },
 ];
 
-const getDifficultyColor = (d) => ({
-  Easy:   'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-  Medium: 'bg-amber-500/20  text-amber-400  border-amber-500/30',
-  Hard:   'bg-red-500/20    text-red-400    border-red-500/30',
-}[d] ?? 'bg-slate-500/20 text-slate-400 border-slate-500/30');
+const getDifficultyColor = (d) => {
+  const styles = {
+    Easy: { backgroundColor: 'rgba(101, 163, 13, 0.12)', color: '#65A30D', borderColor: 'rgba(101, 163, 13, 0.25)' },
+    Medium: { backgroundColor: 'rgba(217, 119, 6, 0.12)', color: '#D97706', borderColor: 'rgba(217, 119, 6, 0.25)' },
+    Hard: { backgroundColor: 'rgba(220, 38, 38, 0.12)', color: '#DC2626', borderColor: 'rgba(220, 38, 38, 0.25)' },
+  };
+  return styles[d] || { backgroundColor: 'rgba(107, 94, 82, 0.12)', color: '#6B5E52', borderColor: 'rgba(107, 94, 82, 0.25)' };
+};
 
 const normalize = (str) =>
   str.trim().replace(/\r\n/g, '\n').replace(/\s+$/gm, '').toLowerCase();

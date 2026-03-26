@@ -136,74 +136,77 @@ const ProblemsPage = () => {
   }, []);
 
   const getDifficultyColor = (difficulty) => {
-    switch (difficulty) {
-      case 'Easy':
-        return 'bg-green-500/20 text-green-400 border-green-500/30';
-      case 'Medium':
-        return 'bg-orange-500/20 text-orange-400 border-orange-500/30';
-      case 'Hard':
-        return 'bg-red-500/20 text-red-400 border-red-500/30';
-      default:
-        return 'bg-slate-500/20 text-slate-400 border-slate-500/30';
-    }
+    const styles = {
+      Easy: { backgroundColor: 'rgba(101, 163, 13, 0.12)', color: '#65A30D', borderColor: 'rgba(101, 163, 13, 0.25)' },
+      Medium: { backgroundColor: 'rgba(217, 119, 6, 0.12)', color: '#D97706', borderColor: 'rgba(217, 119, 6, 0.25)' },
+      Hard: { backgroundColor: 'rgba(220, 38, 38, 0.12)', color: '#DC2626', borderColor: 'rgba(220, 38, 38, 0.25)' },
+    };
+    return styles[difficulty] || { backgroundColor: 'rgba(107, 94, 82, 0.12)', color: '#6B5E52', borderColor: 'rgba(107, 94, 82, 0.25)' };
   };
 
-  const ProblemCard = ({ problem, isVisible }) => (
-    <div
-      className={`group bg-slate-900/50 border border-slate-800 rounded-xl p-6 hover:border-blue-500/50 transition-all duration-500 transform ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-        } hover:shadow-xl hover:shadow-blue-500/10 hover:bg-slate-900/80`}
-    >
-      <div className="flex items-start justify-between gap-4 mb-3">
-        <div className="flex items-start gap-3 flex-1">
-          <div className="p-2 bg-blue-500/10 rounded-lg group-hover:bg-blue-500/20 transition-colors">
-            <Code className="w-5 h-5 text-blue-400" />
-          </div>
-          <div>
-            <h3 className="text-lg font-semibold text-slate-100 group-hover:text-blue-400 transition-colors">
-              {problem.title}
-            </h3>
-            <div className="flex items-center gap-2 mt-2 text-xs">
-              <span className={`px-2 py-1 rounded-full border ${getDifficultyColor(problem.difficulty)}`}>
-                {problem.difficulty}
-              </span>
-              <span className="text-slate-400">{problem.category}</span>
+  const ProblemCard = ({ problem, isVisible }) => {
+    const diffColor = getDifficultyColor(problem.difficulty);
+    return (
+      <div
+        className={`group rounded-xl p-6 transition-all duration-500 transform border ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
+        style={{ 
+          backgroundColor: 'var(--bg-surface)', 
+          borderColor: 'var(--border)',
+          boxShadow: isVisible ? `0 10px 25px var(--accent-glow)` : 'none'
+        }}
+      >
+        <div className="flex items-start justify-between gap-4 mb-3">
+          <div className="flex items-start gap-3 flex-1">
+            <div className="p-2 rounded-lg transition-colors duration-200" style={{ backgroundColor: 'color-mix(in srgb, var(--accent-glow) 50%, transparent)' }}>
+              <Code className="w-5 h-5" style={{ color: 'var(--accent)' }} />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold transition-colors duration-200" style={{ color: 'var(--text-primary)' }}>
+                {problem.title}
+              </h3>
+              <div className="flex items-center gap-2 mt-2 text-xs">
+                <span className="px-2 py-1 rounded-full border transition-colors duration-200" style={{ ...diffColor, borderWidth: '1px', borderStyle: 'solid' }}>
+                  {problem.difficulty}
+                </span>
+                <span transition-colors duration-200" style={{ color: 'var(--text-secondary)' }}>{problem.category}</span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <p className="text-sm text-slate-400 mb-4 leading-relaxed">{problem.description}</p>
+        <p className="text-sm mb-4 leading-relaxed transition-colors duration-200" style={{ color: 'var(--text-secondary)' }}>{problem.description}</p>
 
-      <div className="flex items-center justify-between">
-        <span className="text-xs text-slate-500 font-medium">Problem #{problem.id}</span>
-        <button onClick={() => navigate(`/problems/${problem.id}`)} className="inline-flex items-center gap-1 px-3 py-1 text-sm font-semibold text-green-400 hover:bg-green-500/10 rounded-lg transition-all duration-300 group-hover:gap-2">
-          Solve <ChevronRight className="w-4 h-4" />
-        </button>
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-medium transition-colors duration-200" style={{ color: 'var(--text-muted)' }}>Problem #{problem.id}</span>
+          <button onClick={() => navigate(`/problems/${problem.id}`)} className="inline-flex items-center gap-1 px-3 py-1 text-sm font-semibold rounded-lg transition-all duration-300 group-hover:gap-2" style={{ color: 'var(--accent)', backgroundColor: 'transparent', border: 'none' }}>
+            Solve <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
-    <div className="bg-slate-950 text-slate-100 min-h-screen overflow-hidden">
+    <div className="min-h-screen overflow-hidden transition-colors duration-200" style={{ backgroundColor: 'var(--bg-base)', color: 'var(--text-primary)' }}>
       <Navbar />
 
       {/* Background accent */}
-      <div className="absolute top-20 right-0 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl -z-10"></div>
+      <div className="absolute top-20 right-0 w-96 h-96 rounded-full blur-3xl -z-10" style={{ backgroundColor: 'rgba(217,119,6,0.05)' }}></div>
 
       {/* Header Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-16">
         <div className="space-y-4">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-slate-800/50 border border-slate-700 rounded-full">
-            <Zap className="w-4 h-4 text-green-400" />
-            <span className="text-sm text-slate-300">15 Curated Problems</span>
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border transition-colors duration-200" style={{ backgroundColor: 'var(--bg-elevated)', borderColor: 'var(--border)' }}>
+            <Zap className="w-4 h-4" style={{ color: 'var(--success)' }} />
+            <span className="text-sm transition-colors duration-200" style={{ color: 'var(--text-secondary)' }}>15 Curated Problems</span>
           </div>
           <h1 className="text-5xl sm:text-6xl font-bold">
-            <span className="text-slate-100">Practice </span>
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-blue-400 to-green-400">
+            <span style={{ color: 'var(--text-primary)' }}>Practice </span>
+            <span className="text-transparent bg-clip-text" style={{ backgroundImage: 'linear-gradient(to right, var(--accent-bright), var(--accent), var(--accent-bright))' }}>
               Coding Problems
             </span>
           </h1>
-          <p className="text-xl text-slate-400 max-w-2xl">
+          <p className="text-xl max-w-2xl transition-colors duration-200" style={{ color: 'var(--text-secondary)' }}>
             Sharpen your coding skills with these curated problems. Master algorithms and data structures one problem at a time.
           </p>
         </div>
@@ -225,67 +228,64 @@ const ProblemsPage = () => {
       {/* Stats Section */}
       <section className="mt-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-slate-100">Problem Breakdown</h2>
-          <p className="text-slate-400 mt-2 text-sm">Track your journey across all difficulty levels</p>
+          <h2 className="text-3xl font-bold transition-colors duration-200" style={{ color: 'var(--text-primary)' }}>Problem Breakdown</h2>
+          <p className="mt-2 text-sm transition-colors duration-200" style={{ color: 'var(--text-secondary)' }}>Track your journey across all difficulty levels</p>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {/* Total */}
-          <div className="relative group text-center p-6 bg-slate-900/60 rounded-2xl border border-slate-700/50 hover:border-blue-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/10 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div className="relative group text-center p-6 rounded-2xl border transition-all duration-300 overflow-hidden" style={{ backgroundColor: 'var(--bg-surface)', borderColor: 'var(--border)' }}>
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: 'linear-gradient(to bottom right, var(--accent-glow), transparent)' }} />
             <div className="relative">
-              <div className="w-10 h-10 bg-blue-500/10 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-blue-500/20 transition-colors">
-                <span className="text-blue-400 text-lg font-bold">#</span>
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-3 transition-colors duration-200" style={{ backgroundColor: 'color-mix(in srgb, var(--accent-glow) 50%, transparent)', color: 'var(--accent)' }}>
+                <span className="text-lg font-bold">#</span>
               </div>
-              <div className="text-4xl font-bold text-blue-400 mb-1">{problems.length}</div>
-              <div className="text-xs text-slate-400 font-medium uppercase tracking-wider">Total</div>
+              <div className="text-4xl font-bold mb-1" style={{ color: 'var(--accent-bright)' }}>{problems.length}</div>
+              <div className="text-xs font-medium uppercase tracking-wider transition-colors duration-200" style={{ color: 'var(--text-muted)' }}>Total</div>
             </div>
           </div>
 
           {/* Easy */}
-          <div className="relative group text-center p-6 bg-slate-900/60 rounded-2xl border border-slate-700/50 hover:border-green-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-green-500/10 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div className="relative group text-center p-6 rounded-2xl border transition-all duration-300 overflow-hidden" style={{ backgroundColor: 'var(--bg-surface)', borderColor: 'var(--border)' }}>
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: 'linear-gradient(to bottom right, rgba(101,163,13,0.1), transparent)' }} />
             <div className="relative">
-              <div className="w-10 h-10 bg-green-500/10 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-green-500/20 transition-colors">
-                <div className="w-2.5 h-2.5 bg-green-400 rounded-full" />
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-3 transition-colors duration-200" style={{ backgroundColor: 'color-mix(in srgb, var(--success) 10%, transparent)' }}>
+                <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: 'var(--success)' }} />
               </div>
               <AnimatedCounter label="" finalValue={String(difficultyStats.easy)} />
-              <div className="text-xs text-slate-400 font-medium uppercase tracking-wider mt-1">Easy</div>
-              <div className="mt-3 h-1 bg-slate-800 rounded-full overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-green-500 to-emerald-400 rounded-full"
-                  style={{ width: `${(difficultyStats.easy / problems.length) * 100}%` }} />
+              <div className="text-xs font-medium uppercase tracking-wider mt-1 transition-colors duration-200" style={{ color: 'var(--text-muted)' }}>Easy</div>
+              <div className="mt-3 h-1 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--bg-muted)' }}>
+                <div className="h-full rounded-full transition-all duration-500" style={{ background: 'linear-gradient(to right, var(--success), #86efac)', width: `${(difficultyStats.easy / problems.length) * 100}%` }} />
               </div>
             </div>
           </div>
 
           {/* Medium */}
-          <div className="relative group text-center p-6 bg-slate-900/60 rounded-2xl border border-slate-700/50 hover:border-orange-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-orange-500/10 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-yellow-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div className="relative group text-center p-6 rounded-2xl border transition-all duration-300 overflow-hidden" style={{ backgroundColor: 'var(--bg-surface)', borderColor: 'var(--border)' }}>
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: 'linear-gradient(to bottom right, rgba(217,119,6,0.1), transparent)' }} />
             <div className="relative">
-              <div className="w-10 h-10 bg-orange-500/10 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-orange-500/20 transition-colors">
-                <div className="w-2.5 h-2.5 bg-orange-400 rounded-full" />
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-3 transition-colors duration-200" style={{ backgroundColor: 'color-mix(in srgb, var(--warning) 10%, transparent)' }}>
+                <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: 'var(--warning)' }} />
               </div>
               <AnimatedCounter label="" finalValue={String(difficultyStats.medium)} />
-              <div className="text-xs text-slate-400 font-medium uppercase tracking-wider mt-1">Medium</div>
-              <div className="mt-3 h-1 bg-slate-800 rounded-full overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-orange-500 to-yellow-400 rounded-full"
-                  style={{ width: `${(difficultyStats.medium / problems.length) * 100}%` }} />
+              <div className="text-xs font-medium uppercase tracking-wider mt-1 transition-colors duration-200" style={{ color: 'var(--text-muted)' }}>Medium</div>
+              <div className="mt-3 h-1 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--bg-muted)' }}>
+                <div className="h-full rounded-full transition-all duration-500" style={{ background: 'linear-gradient(to right, var(--warning), #fcd34d)', width: `${(difficultyStats.medium / problems.length) * 100}%` }} />
               </div>
             </div>
           </div>
 
           {/* Hard */}
-          <div className="relative group text-center p-6 bg-slate-900/60 rounded-2xl border border-slate-700/50 hover:border-red-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-red-500/10 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 to-rose-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div className="relative group text-center p-6 rounded-2xl border transition-all duration-300 overflow-hidden" style={{ backgroundColor: 'var(--bg-surface)', borderColor: 'var(--border)' }}>
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: 'linear-gradient(to bottom right, rgba(220,38,38,0.1), transparent)' }} />
             <div className="relative">
-              <div className="w-10 h-10 bg-red-500/10 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-red-500/20 transition-colors">
-                <div className="w-2.5 h-2.5 bg-red-400 rounded-full" />
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-3 transition-colors duration-200" style={{ backgroundColor: 'color-mix(in srgb, var(--danger) 10%, transparent)' }}>
+                <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: 'var(--danger)' }} />
               </div>
               <AnimatedCounter label="" finalValue={String(difficultyStats.hard)} />
-              <div className="text-xs text-slate-400 font-medium uppercase tracking-wider mt-1">Hard</div>
-              <div className="mt-3 h-1 bg-slate-800 rounded-full overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-red-500 to-rose-400 rounded-full"
-                  style={{ width: `${(difficultyStats.hard / problems.length) * 100}%` }} />
+              <div className="text-xs font-medium uppercase tracking-wider mt-1 transition-colors duration-200" style={{ color: 'var(--text-muted)' }}>Hard</div>
+              <div className="mt-3 h-1 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--bg-muted)' }}>
+                <div className="h-full rounded-full transition-all duration-500" style={{ background: 'linear-gradient(to right, var(--danger), #fca5a5)', width: `${(difficultyStats.hard / problems.length) * 100}%` }} />
               </div>
             </div>
           </div>
@@ -294,21 +294,21 @@ const ProblemsPage = () => {
 
       {/* Motivational Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-        <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-2xl p-12 sm:p-16 text-center">
-          <h2 className="text-4xl sm:text-5xl font-bold mb-4">Ready to ace your interviews?</h2>
-          <p className="text-xl text-slate-400 mb-8 max-w-2xl mx-auto">
+        <div className="rounded-2xl p-12 sm:p-16 text-center border transition-colors duration-200" style={{ backgroundColor: 'color-mix(in srgb, var(--accent-dim) 50%, transparent)', borderColor: 'var(--border-accent)' }}>
+          <h2 className="text-4xl sm:text-5xl font-bold mb-4 transition-colors duration-200" style={{ color: 'var(--text-primary)' }}>Ready to ace your interviews?</h2>
+          <p className="text-xl mb-8 max-w-2xl mx-auto transition-colors duration-200" style={{ color: 'var(--text-secondary)' }}>
             Start solving problems today and build the confidence you need for your next coding interview.
           </p>
-          <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold rounded-lg hover:shadow-lg hover:shadow-blue-500/50 transition-all duration-300 hover:scale-105">
+          <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="px-8 py-3 text-black font-semibold rounded-lg hover:shadow-lg transition-all duration-300 hover:scale-105" style={{ background: 'var(--gradient-gold)', boxShadow: `0 4px 20px var(--accent-glow)` }}>
             Start Solving Now
           </button>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-slate-800 bg-slate-900/50">
+      <footer className="transition-colors duration-200" style={{ borderColor: 'var(--border)', borderTopWidth: '1px', backgroundColor: 'color-mix(in srgb, var(--bg-surface) 50%, transparent)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="border-slate-800 flex flex-col sm:flex-row justify-center items-center text-sm text-slate-400">
+          <div className="flex flex-col sm:flex-row justify-center items-center text-sm transition-colors duration-200" style={{ color: 'var(--text-muted)' }}>
             <p>&copy; 2026 InterviewIQ by Neel Lokhandwala. All rights reserved.</p>
           </div>
         </div>

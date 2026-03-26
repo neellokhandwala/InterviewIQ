@@ -59,11 +59,11 @@ export default function AnimatedCounter({ finalValue, label }) {
 
   return (
     <div ref={counterRef} className="text-center">
-      <div className="text-3xl font-bold text-blue-400 mb-2">
+      <div className="text-3xl font-bold mb-2" style={{ color: 'var(--accent-bright)' }}>
         {displayValue}
         {suffix}
       </div>
-      <div className="text-sm text-slate-400">{label}</div>
+      <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>{label}</div>
     </div>
   );
 }

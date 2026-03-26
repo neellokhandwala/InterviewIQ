@@ -19,8 +19,8 @@ function App() {
   }, [getToken])
 
   if (!isLoaded) return (
-    <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-      <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg-base)' }}>
+      <div className="w-6 h-6 border-2 rounded-full animate-spin" style={{ borderColor: 'var(--accent)', borderTopColor: 'transparent' }} />
     </div>
   )
 

@@ -34,14 +34,10 @@ const DashboardPage = () => {
           axiosInstance.get('/sessions/my-recent')
         ])
         
-        console.log("[v0] Active sessions response:", activRes.data)
-        console.log("[v0] Past sessions response:", pastRes.data)
-        
         setActiveSessions(Array.isArray(activRes.data.sessions) ? activRes.data.sessions : [])
         setPastSessions(Array.isArray(pastRes.data.sessions) ? pastRes.data.sessions : [])
       } catch (error) {
         console.error('Error fetching sessions:', error)
-        console.log("[v0] Error response:", error.response?.data)
         toast.error('Failed to load sessions')
       } finally {
         setLoading(false)
@@ -62,7 +58,6 @@ const DashboardPage = () => {
         difficulty: selectedProblem.difficulty.toLowerCase()
       })
       
-      console.log("[v0] Create session response:", response.data)
       const newSession = response.data.session
       if (!newSession || !newSession._id) {
         toast.error('Invalid session response from server')
@@ -76,7 +71,6 @@ const DashboardPage = () => {
       navigate(`/session/${newSession._id}`)
     } catch (error) {
       console.error('Error creating session:', error)
-      console.log("[v0] Create session error response:", error.response?.data)
       toast.error('Failed to create session')
     } finally {
       setIsCreating(false)
@@ -105,11 +99,14 @@ const DashboardPage = () => {
     return `${Math.floor(totalMin / 60)}h ${totalMin % 60}m`;
   };
 
-  const diffColor = (d) => ({
-    easy:   'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
-    medium: 'bg-amber-500/15  text-amber-400  border-amber-500/30',
-    hard:   'bg-red-500/15    text-red-400    border-red-500/30',
-  }[d?.toLowerCase()] ?? 'bg-slate-500/15 text-slate-400 border-slate-500/30')
+  const diffColor = (d) => {
+    const styles = {
+      easy: { backgroundColor: 'rgba(101, 163, 13, 0.12)', color: '#65A30D', borderColor: 'rgba(101, 163, 13, 0.25)' },
+      medium: { backgroundColor: 'rgba(217, 119, 6, 0.12)', color: '#D97706', borderColor: 'rgba(217, 119, 6, 0.25)' },
+      hard: { backgroundColor: 'rgba(220, 38, 38, 0.12)', color: '#DC2626', borderColor: 'rgba(220, 38, 38, 0.25)' },
+    };
+    return styles[d?.toLowerCase()] || { backgroundColor: 'rgba(107, 94, 82, 0.12)', color: '#6B5E52', borderColor: 'rgba(107, 94, 82, 0.25)' };
+  }
 
   const problemsList = Object.values(PROBLEMS_DATA)
   const filtered = filterDifficulty === 'All'
@@ -122,9 +119,9 @@ const DashboardPage = () => {
       value: activeSessions.length,
       label: 'Live Sessions',
       badge: 'Live',
-      badgeColor: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
-      iconColor: 'text-emerald-400',
-      glow: 'group-hover:shadow-emerald-500/20',
+      badgeColor: { color: '#65A30D', backgroundColor: 'rgba(101, 163, 13, 0.12)', borderColor: 'rgba(101, 163, 13, 0.25)' },
+      iconColor: '#65A30D',
+      glowColor: 'rgba(101, 163, 13, 0.15)',
       pulse: true,
     },
     {
@@ -132,31 +129,31 @@ const DashboardPage = () => {
       value: activeSessions.length + pastSessions.length,
       label: 'Total Sessions',
       badge: 'All Time',
-      badgeColor: 'text-blue-400 bg-blue-500/10 border-blue-500/20',
-      iconColor: 'text-blue-400',
-      glow: 'group-hover:shadow-blue-500/20',
+      badgeColor: { color: '#0EA5E9', backgroundColor: 'rgba(14, 165, 233, 0.12)', borderColor: 'rgba(14, 165, 233, 0.25)' },
+      iconColor: '#0EA5E9',
+      glowColor: 'rgba(14, 165, 233, 0.15)',
     },
     {
       icon: TrendingUp,
       value: activeSessions.filter(s => !s.participant).length,
       label: 'Open Sessions',
       badge: 'Real-time',
-      badgeColor: 'text-violet-400 bg-violet-500/10 border-violet-500/20',
-      iconColor: 'text-violet-400',
-      glow: 'group-hover:shadow-violet-500/20',
+      badgeColor: { color: '#D97706', backgroundColor: 'rgba(217, 119, 6, 0.12)', borderColor: 'rgba(217, 119, 6, 0.25)' },
+      iconColor: '#D97706',
+      glowColor: 'rgba(217, 119, 6, 0.15)',
       pulse: true,
     },
   ]
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
+    <div className="min-h-screen transition-colors duration-200" style={{ backgroundColor: 'var(--bg-base)', color: 'var(--text-primary)' }}>
       <Navbar />
 
       {/* Ambient background blobs */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/5 rounded-full blur-[120px]" />
-        <div className="absolute bottom-1/3 right-1/4 w-80 h-80 bg-emerald-500/5 rounded-full blur-[100px]" />
-        <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-violet-500/4 rounded-full blur-[80px]" />
+        <div className="absolute top-0 left-1/4 w-96 h-96 rounded-full blur-[120px]" style={{ backgroundColor: 'rgba(217,119,6,0.04)' }} />
+        <div className="absolute bottom-1/3 right-1/4 w-80 h-80 rounded-full blur-[100px]" style={{ backgroundColor: 'rgba(245,158,11,0.03)' }} />
+        <div className="absolute top-1/2 left-1/2 w-64 h-64 rounded-full blur-[80px]" style={{ backgroundColor: 'rgba(146,64,14,0.03)' }} />
       </div>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16">
@@ -164,17 +161,17 @@ const DashboardPage = () => {
         {/* ── HEADER ── */}
         <div className="flex items-start justify-between mb-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2">Dashboard</p>
-            <h1 className="text-3xl sm:text-4xl font-bold text-slate-100 mb-1">
-              Welcome back, <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">{firstName}</span>
+            <p className="text-xs font-semibold uppercase tracking-widest mb-2 transition-colors duration-200" style={{ color: 'var(--text-muted)' }}>Dashboard</p>
+            <h1 className="text-3xl sm:text-4xl font-bold mb-1 transition-colors duration-200" style={{ color: 'var(--text-primary)' }}>
+              Welcome back, <span className="text-transparent bg-clip-text" style={{ backgroundImage: 'linear-gradient(to right, var(--accent), var(--info))' }}>{firstName}</span>
             </h1>
-            <p className="text-slate-400 text-sm">Ready to crush your next interview?</p>
+            <p className="text-sm transition-colors duration-200" style={{ color: 'var(--text-secondary)' }}>Ready to crush your next interview?</p>
           </div>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="relative group hidden sm:flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-emerald-500/30"
+            className="relative group hidden sm:flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-black overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-lg"
+            style={{ background: 'var(--gradient-gold)', boxShadow: `0 4px 20px var(--accent-glow)` }}
           >
-            <span className="absolute inset-0 bg-gradient-to-r from-emerald-500 to-teal-500" />
             <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
             <Zap className="relative w-4 h-4" />
             <span className="relative">New Session</span>
@@ -183,26 +180,26 @@ const DashboardPage = () => {
 
         {/* ── STATS ── */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
-          {stats.map(({ icon: Icon, value, label, badge, badgeColor, iconColor, glow, pulse }, i) => (
+          {stats.map(({ icon: Icon, value, label, badge, badgeColor, iconColor, glowColor, pulse }, i) => (
             <div
               key={label}
-              className={`group relative overflow-hidden rounded-2xl bg-slate-900/60 border border-slate-800 p-5 hover:border-slate-700 transition-all duration-300 hover:shadow-xl ${glow} backdrop-blur-sm`}
-              style={{ animationDelay: `${i * 0.1}s` }}
+              className="group relative overflow-hidden rounded-2xl p-5 border transition-all duration-300 hover:shadow-xl backdrop-blur-sm"
+              style={{ animationDelay: `${i * 0.1}s`, backgroundColor: 'var(--bg-surface)', borderColor: 'var(--border)', boxShadow: `0 8px 32px ${glowColor}` }}
             >
               {/* top-right glow orb */}
               <div className="absolute -top-4 -right-4 w-20 h-20 rounded-full blur-2xl opacity-20 group-hover:opacity-40 transition-opacity"
-                style={{ background: iconColor.replace('text-', 'var(--tw-') }} />
+                style={{ backgroundColor: glowColor }} />
               <div className="flex items-center justify-between mb-4">
-                <div className={`p-2 rounded-lg bg-slate-800/80 ${iconColor}`}>
+                <div className="p-2 rounded-lg transition-colors duration-200" style={{ backgroundColor: 'color-mix(in srgb, var(--bg-muted) 80%, transparent)', color: iconColor }}>
                   <Icon className="w-5 h-5" />
                 </div>
-                <span className={`flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full border ${badgeColor}`}>
-                  {pulse && <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />}
+                <span className="flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full border transition-colors duration-200" style={{ ...badgeColor, borderWidth: '1px', borderStyle: 'solid' }}>
+                  {pulse && <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: badgeColor.color }} />}
                   {badge}
                 </span>
               </div>
-              <div className="text-3xl font-bold text-slate-100 mb-0.5">{value}</div>
-              <div className="text-xs text-slate-500 font-medium">{label}</div>
+              <div className="text-3xl font-bold mb-0.5 transition-colors duration-200" style={{ color: 'var(--text-primary)' }}>{value}</div>
+              <div className="text-xs font-medium transition-colors duration-200" style={{ color: 'var(--text-muted)' }}>{label}</div>
             </div>
           ))}
         </div>
@@ -211,13 +208,13 @@ const DashboardPage = () => {
         <section className="mb-12">
           <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-                <Zap className="w-4 h-4 text-emerald-400" />
+              <div className="w-8 h-8 rounded-lg border flex items-center justify-center transition-colors duration-200" style={{ backgroundColor: 'color-mix(in srgb, var(--success) 12%, transparent)', borderColor: 'rgba(101, 163, 13, 0.25)', color: '#65A30D' }}>
+                <Zap className="w-4 h-4" />
               </div>
-              <h2 className="text-lg font-bold text-slate-100">Live Sessions</h2>
+              <h2 className="text-lg font-bold transition-colors duration-200" style={{ color: 'var(--text-primary)' }}>Live Sessions</h2>
               {activeSessions.length > 0 && (
-                <span className="flex items-center gap-1 text-xs font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
-                  <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
+                <span className="flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full border transition-colors duration-200" style={{ color: '#65A30D', backgroundColor: 'rgba(101, 163, 13, 0.12)', borderColor: 'rgba(101, 163, 13, 0.25)' }}>
+                  <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: '#65A30D' }} />
                   {activeSessions.length} active
                 </span>
               )}
@@ -236,36 +233,37 @@ const DashboardPage = () => {
                 const participantCount = session.participant ? 2 : 1
                 return (
                   <div key={session._id}
-                    className="group relative overflow-hidden rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-emerald-500/40 transition-all duration-300 hover:shadow-xl hover:shadow-emerald-500/10 backdrop-blur-sm">
+                    className="group relative overflow-hidden rounded-2xl border transition-all duration-300 hover:shadow-xl backdrop-blur-sm"
+                    style={{ backgroundColor: 'var(--bg-surface)', borderColor: 'var(--border)', boxShadow: '0 8px 32px rgba(101, 163, 13, 0.1)' }}>
                     {/* left accent bar */}
-                    <div className="absolute left-0 top-4 bottom-4 w-0.5 bg-gradient-to-b from-emerald-500/0 via-emerald-500/60 to-emerald-500/0 rounded-full" />
+                    <div className="absolute left-0 top-4 bottom-4 w-0.5 rounded-full" style={{ background: 'linear-gradient(to bottom, rgba(101, 163, 13, 0), rgba(101, 163, 13, 0.6), rgba(101, 163, 13, 0))' }} />
 
                     <div className="p-5 pl-6">
                       <div className="flex items-start justify-between mb-4">
                         <div>
                           <div className="flex items-center gap-2 mb-1">
-                            <h3 className="font-bold text-slate-100">{session.problem}</h3>
-                            <span className="flex items-center gap-1 text-xs font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded-full">
-                              <span className="w-1 h-1 bg-emerald-400 rounded-full animate-pulse" />Live
+                            <h3 className="font-bold transition-colors duration-200" style={{ color: 'var(--text-primary)' }}>{session.problem}</h3>
+                            <span className="flex items-center gap-1 text-xs font-semibold px-1.5 py-0.5 rounded-full border transition-colors duration-200" style={{ color: '#65A30D', backgroundColor: 'rgba(101, 163, 13, 0.12)', borderColor: 'rgba(101, 163, 13, 0.25)' }}>
+                              <span className="w-1 h-1 rounded-full animate-pulse" style={{ backgroundColor: '#65A30D' }} />Live
                             </span>
                           </div>
-                          <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${diffColor(session.difficulty)}`}>
+                          <span className="text-xs font-semibold px-2 py-0.5 rounded-full border transition-colors duration-200" style={{ ...diffColor(session.difficulty), borderWidth: '1px', borderStyle: 'solid' }}>
                             {session.difficulty.charAt(0).toUpperCase() + session.difficulty.slice(1)}
                           </span>
                         </div>
-                        <span className="text-xs text-slate-600">{formatTimeAgo(new Date(session.createdAt))}</span>
+                        <span className="text-xs transition-colors duration-200" style={{ color: 'var(--text-muted)' }}>{formatTimeAgo(new Date(session.createdAt))}</span>
                       </div>
 
                       <div className="grid grid-cols-2 gap-3 mb-4">
-                        <div className="flex items-center gap-2 bg-slate-800/60 rounded-lg px-3 py-2">
-                          <Users className="w-3.5 h-3.5 text-emerald-400" />
-                          <span className="text-xs text-slate-300 font-medium">
+                        <div className="flex items-center gap-2 rounded-lg px-3 py-2 transition-colors duration-200" style={{ backgroundColor: 'var(--bg-elevated)' }}>
+                          <Users className="w-3.5 h-3.5" style={{ color: '#65A30D' }} />
+                          <span className="text-xs font-medium transition-colors duration-200" style={{ color: 'var(--text-secondary)' }}>
                             {participantCount}/2 joined
                           </span>
                         </div>
-                        <div className="flex items-center gap-2 bg-slate-800/60 rounded-lg px-3 py-2">
-                          <Video className="w-3.5 h-3.5 text-violet-400" />
-                          <span className="text-xs text-slate-300 font-medium">
+                        <div className="flex items-center gap-2 rounded-lg px-3 py-2 transition-colors duration-200" style={{ backgroundColor: 'var(--bg-elevated)' }}>
+                          <Video className="w-3.5 h-3.5" style={{ color: '#D97706' }} />
+                          <span className="text-xs font-medium transition-colors duration-200" style={{ color: 'var(--text-secondary)' }}>
                             {participantCount}/2 on video
                           </span>
                         </div>
@@ -273,10 +271,10 @@ const DashboardPage = () => {
 
                       {/* Capacity bar */}
                       <div className="mb-4">
-                        <div className="h-1 bg-slate-800 rounded-full overflow-hidden">
+                        <div className="h-1 rounded-full overflow-hidden transition-colors duration-200" style={{ backgroundColor: 'var(--bg-muted)' }}>
                           <div
-                            className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-500"
-                            style={{ width: `${(participantCount / 2) * 100}%` }}
+                            className="h-full rounded-full transition-all duration-500"
+                            style={{ background: 'linear-gradient(to right, #65A30D, #84CC16)', width: `${(participantCount / 2) * 100}%` }}
                           />
                         </div>
                       </div>
@@ -284,11 +282,15 @@ const DashboardPage = () => {
                       <button
                         onClick={() => handleJoinSession(session._id)}
                         disabled={participantCount >= 2}
-                        className={`w-full py-2 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all duration-300 ${
-                          participantCount >= 2
-                            ? 'bg-slate-800/50 text-slate-500 cursor-not-allowed'
-                            : 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:shadow-lg hover:shadow-emerald-500/30 hover:scale-[1.02] active:scale-95'
-                        }`}
+                        className="w-full py-2 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all duration-300"
+                        style={{
+                          backgroundColor: participantCount >= 2 ? 'var(--bg-muted)' : 'transparent',
+                          color: participantCount >= 2 ? 'var(--text-muted)' : '#000',
+                          background: participantCount >= 2 ? 'var(--bg-muted)' : 'linear-gradient(135deg, #65A30D, #84CC16)',
+                          cursor: participantCount >= 2 ? 'not-allowed' : 'pointer',
+                          opacity: participantCount >= 2 ? '0.5' : '1',
+                          boxShadow: participantCount < 2 ? '0 4px 20px rgba(101, 163, 13, 0.15)' : 'none'
+                        }}
                       >
                         <PlayCircle className="w-4 h-4" />
                         {participantCount >= 2 ? 'Session Full' : 'Join Now'}
@@ -299,12 +301,12 @@ const DashboardPage = () => {
               })}
             </div>
           ) : (
-            <div className="rounded-2xl bg-slate-900/40 border border-slate-800 border-dashed p-12 text-center">
-              <div className="w-12 h-12 rounded-xl bg-slate-800/80 flex items-center justify-center mx-auto mb-3">
-                <Zap className="w-6 h-6 text-slate-600" />
+            <div className="rounded-2xl border border-dashed p-12 text-center transition-colors duration-200" style={{ backgroundColor: 'color-mix(in srgb, var(--bg-elevated) 40%, transparent)', borderColor: 'var(--border)' }}>
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3 transition-colors duration-200" style={{ backgroundColor: 'var(--bg-muted)', color: 'var(--text-muted)' }}>
+                <Zap className="w-6 h-6" />
               </div>
-              <p className="text-slate-400 font-medium mb-1">No live sessions</p>
-              <p className="text-sm text-slate-600">Create one to get started!</p>
+              <p className="font-medium mb-1 transition-colors duration-200" style={{ color: 'var(--text-secondary)' }}>No live sessions</p>
+              <p className="text-sm transition-colors duration-200" style={{ color: 'var(--text-muted)' }}>Create one to get started!</p>
             </div>
           )}
         </section>
@@ -312,12 +314,12 @@ const DashboardPage = () => {
         {/* ── PAST SESSIONS ── */}
         <section>
           <div className="flex items-center gap-2.5 mb-5">
-            <div className="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
-              <Calendar className="w-4 h-4 text-blue-400" />
+            <div className="w-8 h-8 rounded-lg border flex items-center justify-center transition-colors duration-200" style={{ backgroundColor: 'color-mix(in srgb, var(--info) 12%, transparent)', borderColor: 'rgba(14, 165, 233, 0.25)', color: '#0EA5E9' }}>
+              <Calendar className="w-4 h-4" />
             </div>
-            <h2 className="text-lg font-bold text-slate-100">Past Sessions</h2>
+            <h2 className="text-lg font-bold transition-colors duration-200" style={{ color: 'var(--text-primary)' }}>Past Sessions</h2>
             {pastSessions.length > 0 && (
-              <span className="text-xs font-semibold text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded-full">
+              <span className="text-xs font-semibold px-2 py-0.5 rounded-full border transition-colors duration-200" style={{ color: '#0EA5E9', backgroundColor: 'rgba(14, 165, 233, 0.12)', borderColor: 'rgba(14, 165, 233, 0.25)' }}>
                 {pastSessions.length} completed
               </span>
             )}
