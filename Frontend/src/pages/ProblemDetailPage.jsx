@@ -15,8 +15,8 @@ import confetti from 'canvas-confetti';
 
 const languages = [
   { id: 'javascript', name: 'JavaScript', icon: '📜', monacoLang: 'javascript' },
-  { id: 'python',     name: 'Python',     icon: '🐍', monacoLang: 'python' },
-  { id: 'java',       name: 'Java',       icon: '☕', monacoLang: 'java' },
+  { id: 'python', name: 'Python', icon: '🐍', monacoLang: 'python' },
+  { id: 'java', name: 'Java', icon: '☕', monacoLang: 'java' },
 ];
 
 const getDifficultyColor = (d) => {
@@ -42,7 +42,7 @@ export default function ProblemDetailPage() {
 
   const [selectedLanguage, setSelectedLanguage] = useState('javascript');
   const getSavedCode = (problemId, lang) => {
-    return localStorage.getItem(`code_${problemId}_${lang}`) 
+    return localStorage.getItem(`code_${problemId}_${lang}`)
       || PROBLEMS_DATA[problemId]?.starterCode[lang];
   };
   const [code, setCode] = useState(() => getSavedCode(problem.id, 'javascript'));
@@ -125,7 +125,7 @@ export default function ProblemDetailPage() {
 
   const tabs = [
     { id: 'description', label: 'Description', icon: BookOpen },
-    { id: 'examples',    label: 'Examples',    icon: TestTube },
+    { id: 'examples', label: 'Examples', icon: TestTube },
     { id: 'constraints', label: 'Constraints', icon: AlertCircle },
   ];
 
@@ -271,37 +271,6 @@ export default function ProblemDetailPage() {
                         <li key={i} className="flex items-start gap-3 rounded-lg px-4 py-3 border transition-colors duration-200" style={{ backgroundColor: 'var(--bg-elevated)', borderColor: 'var(--border)' }}>
                           <span className="font-bold mt-0.5 transition-colors duration-200" style={{ color: 'var(--accent)' }}>•</span>
                           <code className="font-mono text-xs transition-colors duration-200" style={{ color: 'var(--text-secondary)' }}>{c}</code>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-                          <div className="p-4 space-y-2 font-mono text-xs">
-                            <div className="flex gap-2">
-                              <span className="text-blue-400 font-bold w-16 shrink-0">Input:</span>
-                              <span className="text-slate-300">{ex.input}</span>
-                            </div>
-                            <div className="flex gap-2">
-                              <span className="text-green-400 font-bold w-16 shrink-0">Output:</span>
-                              <span className="text-slate-300">{ex.output}</span>
-                            </div>
-                            {ex.explanation && (
-                              <div className="flex gap-2 pt-2 border-t border-slate-800">
-                                <span className="text-slate-500 font-bold w-16 shrink-0">Explain:</span>
-                                <span className="text-slate-400">{ex.explanation}</span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  {activeTab === 'constraints' && (
-                    <ul className="space-y-2">
-                      {problem.constraints.map((c, i) => (
-                        <li key={i} className="flex items-start gap-3 bg-slate-900/40 border border-slate-800 rounded-lg px-4 py-3">
-                          <span className="text-blue-400 font-bold mt-0.5">•</span>
-                          <code className="font-mono text-xs text-slate-300">{c}</code>
                         </li>
                       ))}
                     </ul>
