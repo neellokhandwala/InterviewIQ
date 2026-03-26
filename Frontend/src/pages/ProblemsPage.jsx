@@ -168,7 +168,7 @@ const ProblemsPage = () => {
                 <span className="px-2 py-1 rounded-full border transition-colors duration-200" style={{ ...diffColor, borderWidth: '1px', borderStyle: 'solid' }}>
                   {problem.difficulty}
                 </span>
-                <span transition-colors duration-200" style={{ color: 'var(--text-secondary)' }}>{problem.category}</span>
+                <span className="transition-colors duration-200" style={{ color: 'var(--text-secondary)' }}>{problem.category}</span>
               </div>
             </div>
           </div>

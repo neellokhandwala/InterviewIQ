@@ -62,7 +62,7 @@ function HomePage() {
               ].map((feature, i) => (
                 <div key={i} className="flex items-center gap-3">
                   <Check className="w-5 h-5 flex-shrink-0" style={{ color: 'var(--success)' }} />
-                  <span transition-colors duration-200" style={{ color: 'var(--text-secondary)' }}>{feature}</span>
+                  <span className="transition-colors duration-200" style={{ color: 'var(--text-secondary)' }}>{feature}</span>
                 </div>
               ))}
             </div>
