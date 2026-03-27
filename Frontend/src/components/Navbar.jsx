@@ -24,8 +24,8 @@ export default function Navbar() {
         scrollDirection === 'down' ? '-translate-y-full' : 'translate-y-0'
       }`}
     >
-      {/* Glassmorphism bar */}
-      <div className="mx-4 mt-3 rounded-2xl backdrop-blur-2xl shadow-xl transition-colors duration-200 border" style={{ backgroundColor: theme === 'light' ? 'var(--bg-elevated)' : 'color-mix(in srgb, var(--bg-surface) 70%, transparent)', borderColor: 'var(--border)', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.15)' }}>
+      {/* Navbar bar */}
+      <div className="w-full backdrop-blur-2xl shadow-xl transition-colors duration-200 border-b" style={{ backgroundColor: theme === 'light' ? 'var(--bg-elevated)' : 'color-mix(in srgb, var(--bg-surface) 70%, transparent)', borderColor: 'var(--border)', boxShadow: theme === 'light' ? '0 1px 0 var(--border), 0 2px 8px rgba(0,0,0,0.04)' : 'none' }}>
         {/* Top glow line */}
         <div className="absolute inset-x-0 top-0 h-px rounded-t-2xl" style={{ background: 'linear-gradient(to right, transparent, var(--accent-bright) 50%, transparent)' }} />
 
@@ -107,6 +107,19 @@ export default function Navbar() {
                   appearance={{
                     elements: {
                       avatarBox: `w-9 h-9 rounded-xl ring-2 transition-all`,
+                      card: {
+                        background: 'var(--bg-surface)',
+                        border: '1px solid var(--border)',
+                        boxShadow: '0 8px 32px rgba(0,0,0,0.24)',
+                        borderRadius: '12px',
+                      },
+                      userPreviewMainIdentifier: { color: 'var(--text-primary)' },
+                      userPreviewSecondaryIdentifier: { color: 'var(--text-secondary)' },
+                      userButtonPopoverActionButton: {
+                        color: 'var(--text-secondary)',
+                      },
+                      userButtonPopoverActionButtonIcon: { color: 'var(--text-muted)' },
+                      userButtonPopoverFooter: { borderTop: '1px solid var(--border)' },
                     },
                   }}
                   style={{

@@ -64,6 +64,39 @@ function HomePage() {
               ))}
             </div>
 
+            {/* CTA Button */}
+            <div className="flex flex-wrap gap-4">
+              {isSignedIn ? (
+                <button
+                  onClick={() => navigate('/dashboard')}
+                  className="px-7 py-3 text-black font-bold rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-102 flex items-center gap-2"
+                  style={{ 
+                    background: 'linear-gradient(135deg, #D97706, #F59E0B)', 
+                    boxShadow: '0 4px 24px rgba(217, 119, 6, 0.35)',
+                    fontWeight: '700',
+                    padding: '12px 28px'
+                  }}
+                >
+                  Go to Dashboard
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              ) : (
+                <SignUpButton mode="modal">
+                  <button 
+                    className="px-7 py-3 text-black font-bold rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-102 flex items-center gap-2"
+                    style={{ 
+                      background: 'linear-gradient(135deg, #D97706, #F59E0B)', 
+                      boxShadow: '0 4px 24px rgba(217, 119, 6, 0.35)',
+                      fontWeight: '700',
+                      padding: '12px 28px'
+                    }}
+                  >
+                    Get Started Free
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                </SignUpButton>
+              )}
+            </div>
 
           </div>
 

@@ -119,9 +119,9 @@ const DashboardPage = () => {
       value: activeSessions.length,
       label: 'Live Sessions',
       badge: 'Live',
-      badgeColor: { color: '#65A30D', backgroundColor: 'rgba(101, 163, 13, 0.12)', borderColor: 'rgba(101, 163, 13, 0.25)' },
-      iconColor: '#65A30D',
-      glowColor: 'rgba(101, 163, 13, 0.15)',
+      badgeColor: { color: '#F59E0B', backgroundColor: 'rgba(217, 119, 6, 0.12)', borderColor: 'rgba(217, 119, 6, 0.25)' },
+      iconColor: '#D97706',
+      glowColor: 'rgba(217, 119, 6, 0.15)',
       pulse: true,
     },
     {
@@ -129,7 +129,7 @@ const DashboardPage = () => {
       value: activeSessions.length + pastSessions.length,
       label: 'Total Sessions',
       badge: 'All Time',
-      badgeColor: { color: '#0EA5E9', backgroundColor: 'rgba(14, 165, 233, 0.12)', borderColor: 'rgba(14, 165, 233, 0.25)' },
+      badgeColor: { color: 'var(--text-secondary)', backgroundColor: 'var(--bg-muted)', borderColor: 'var(--border)' },
       iconColor: '#0EA5E9',
       glowColor: 'rgba(14, 165, 233, 0.15)',
     },
@@ -138,9 +138,9 @@ const DashboardPage = () => {
       value: activeSessions.filter(s => !s.participant).length,
       label: 'Open Sessions',
       badge: 'Real-time',
-      badgeColor: { color: '#D97706', backgroundColor: 'rgba(217, 119, 6, 0.12)', borderColor: 'rgba(217, 119, 6, 0.25)' },
-      iconColor: '#D97706',
-      glowColor: 'rgba(217, 119, 6, 0.15)',
+      badgeColor: { color: '#84CC16', backgroundColor: 'rgba(101, 163, 13, 0.12)', borderColor: 'rgba(101, 163, 13, 0.25)' },
+      iconColor: '#65A30D',
+      glowColor: 'rgba(101, 163, 13, 0.15)',
       pulse: true,
     },
   ]
@@ -184,7 +184,9 @@ const DashboardPage = () => {
             <div
               key={label}
               className="group relative overflow-hidden rounded-2xl p-5 border transition-all duration-300 hover:shadow-xl backdrop-blur-sm"
-              style={{ animationDelay: `${i * 0.1}s`, backgroundColor: 'var(--bg-surface)', borderColor: 'var(--border)', boxShadow: `0 8px 32px ${glowColor}` }}
+              style={{ animationDelay: `${i * 0.1}s`, backgroundColor: 'var(--bg-surface)', borderColor: 'var(--border)', boxShadow: `0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04)` }}
+              onMouseEnter={(e) => e.currentTarget.style.boxShadow = '0 4px 20px rgba(217, 119, 6, 0.12)'}
+              onMouseLeave={(e) => e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04)'}
             >
               {/* top-right glow orb */}
               <div className="absolute -top-4 -right-4 w-20 h-20 rounded-full blur-2xl opacity-20 group-hover:opacity-40 transition-opacity"
@@ -208,13 +210,13 @@ const DashboardPage = () => {
         <section className="mb-12">
           <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg border flex items-center justify-center transition-colors duration-200" style={{ backgroundColor: 'color-mix(in srgb, var(--success) 12%, transparent)', borderColor: 'rgba(101, 163, 13, 0.25)', color: '#65A30D' }}>
+              <div className="w-8 h-8 rounded-lg border flex items-center justify-center transition-colors duration-200" style={{ backgroundColor: 'rgba(217, 119, 6, 0.1)', borderColor: 'rgba(217, 119, 6, 0.2)', color: '#D97706' }}>
                 <Zap className="w-4 h-4" />
               </div>
               <h2 className="text-lg font-bold transition-colors duration-200" style={{ color: 'var(--text-primary)' }}>Live Sessions</h2>
               {activeSessions.length > 0 && (
-                <span className="flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full border transition-colors duration-200" style={{ color: '#65A30D', backgroundColor: 'rgba(101, 163, 13, 0.12)', borderColor: 'rgba(101, 163, 13, 0.25)' }}>
-                  <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: '#65A30D' }} />
+                <span className="flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full border transition-colors duration-200" style={{ color: '#F59E0B', backgroundColor: 'rgba(217, 119, 6, 0.12)', borderColor: 'rgba(217, 119, 6, 0.25)' }}>
+                  <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: '#F59E0B' }} />
                   {activeSessions.length} active
                 </span>
               )}
@@ -274,7 +276,7 @@ const DashboardPage = () => {
                         <div className="h-1 rounded-full overflow-hidden transition-colors duration-200" style={{ backgroundColor: 'var(--bg-muted)' }}>
                           <div
                             className="h-full rounded-full transition-all duration-500"
-                            style={{ background: 'linear-gradient(to right, #65A30D, #84CC16)', width: `${(participantCount / 2) * 100}%` }}
+                            style={{ background: 'linear-gradient(90deg, #D97706, #F59E0B)', width: `${(participantCount / 2) * 100}%` }}
                           />
                         </div>
                       </div>
@@ -286,10 +288,10 @@ const DashboardPage = () => {
                         style={{
                           backgroundColor: participantCount >= 2 ? 'var(--bg-muted)' : 'transparent',
                           color: participantCount >= 2 ? 'var(--text-muted)' : '#000',
-                          background: participantCount >= 2 ? 'var(--bg-muted)' : 'linear-gradient(135deg, #65A30D, #84CC16)',
+                          background: participantCount >= 2 ? 'var(--bg-muted)' : 'linear-gradient(135deg, #D97706, #F59E0B)',
                           cursor: participantCount >= 2 ? 'not-allowed' : 'pointer',
                           opacity: participantCount >= 2 ? '0.5' : '1',
-                          boxShadow: participantCount < 2 ? '0 4px 20px rgba(101, 163, 13, 0.15)' : 'none'
+                          boxShadow: participantCount < 2 ? '0 4px 20px rgba(217, 119, 6, 0.3)' : 'none'
                         }}
                       >
                         <PlayCircle className="w-4 h-4" />

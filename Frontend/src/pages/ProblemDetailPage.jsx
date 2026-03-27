@@ -292,10 +292,11 @@ export default function ProblemDetailPage() {
                       <div className="flex gap-1.5">
                         {languages.map((lang) => (
                           <button key={lang.id} onClick={() => handleLanguageChange(lang.id)}
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200"
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all duration-200"
                             style={{
-                              backgroundColor: selectedLanguage === lang.id ? 'var(--accent)' : 'var(--bg-muted)',
-                              color: selectedLanguage === lang.id ? '#000' : 'var(--text-secondary)',
+                              backgroundColor: selectedLanguage === lang.id ? 'rgba(217, 119, 6, 0.1)' : 'var(--bg-elevated)',
+                              color: selectedLanguage === lang.id ? 'var(--accent)' : 'var(--text-muted)',
+                              borderColor: selectedLanguage === lang.id ? 'rgba(217, 119, 6, 0.3)' : 'var(--border)',
                               boxShadow: selectedLanguage === lang.id ? `0 4px 12px var(--accent-glow)` : 'none'
                             }}>
                             <span>{lang.icon}</span>{lang.name}
