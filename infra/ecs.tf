@@ -23,6 +23,13 @@ resource "aws_ecs_task_definition" "task" {
         }
       ]
 
+      environment = [
+        {
+          name  = "VITE_CLERK_PUBLISHABLE_KEY"
+          value = "pk_test_Y2VudHJhbC1tdXNrb3gtOTguY2xlcmsuYWNjb3VudHMuZGV2JA"
+        }
+      ]
+
       logConfiguration = {
         logDriver = "awslogs"
         options = {
