@@ -59,11 +59,7 @@ pipeline {
 
         stage('Build Image') {
             steps {
-                bat """
-                docker build --no-cache ^
-                --build-arg VITE_CLERK_PUBLISHABLE_KEY=pk_test_Y2VudHJhbC1tdXNrb3gtOTguY2xlcmsuYWNjb3VudHMuZGV2JA ^
-                -t ${IMAGE} .
-                """
+                bat "docker build --no-cache -t ${IMAGE} ."
             }
         }
 
