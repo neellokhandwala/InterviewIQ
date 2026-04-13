@@ -44,6 +44,8 @@ pipeline {
                         env.AWS_ACCOUNT_ID = account
                         env.ECR_URI = "${account}.dkr.ecr.${AWS_REGION}.amazonaws.com"
                         env.IMAGE = "${env.ECR_URI}/${ECR_REPO}:${IMAGE_TAG}"
+
+                        echo "Using image: ${env.IMAGE}"
                     }
                 }
             }
@@ -57,7 +59,11 @@ pipeline {
 
         stage('Build Image') {
             steps {
-                bat "docker build --no-cache -t ${IMAGE} ."
+                bat """
+                docker build --no-cache ^
+                --build-arg VITE_CLERK_PUBLISHABLE_KEY=pk_test_Y2VudHJhbC1tdXNrb3gtOTguY2xlcmsuYWNjb3VudHMuZGV2JA ^
+                -t ${IMAGE} .
+                """
             }
         }
 
@@ -88,6 +94,15 @@ pipeline {
                     """
                 }
             }
+        }
+    }
+
+    post {
+        success {
+            echo '✅ Deployment Successful!'
+        }
+        failure {
+            echo '❌ Deployment Failed! Check logs carefully.'
         }
     }
 }
