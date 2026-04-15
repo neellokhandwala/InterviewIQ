@@ -1,52 +1,52 @@
-# 🚀 InterviewIQ — Real-Time Interview Platform
+# InterviewIQ — Real-Time Interview Platform
 
 A full-stack, real-time coding interview platform designed to simulate professional technical interviews with live collaboration, code execution, and automated feedback.
 
 ---
 
-## 🌟 Features
+## Features
 
-- 🔴 **Live Pair Programming**
+- **Live Pair Programming**
   - Real-time collaborative code editor
   - Multi-language support (JavaScript, Python, Java)
   - Instant code execution with output
 
-- 🎥 **Integrated Video & Audio**
+- **Integrated Video & Audio**
   - 1-on-1 interview sessions
   - Camera/mic controls and screen sharing
 
-- ⚡ **Real-Time Communication**
+- **Real-Time Communication**
   - WebSocket-based low-latency updates
   - Live participant tracking and session sync
 
-- 📊 **Smart Evaluation System**
+- **Smart Evaluation System**
   - Test-case based automatic grading
   - Immediate feedback on code submissions
 
-- 🧠 **Practice Mode**
+- **Practice Mode**
   - Curated DSA problems (Easy → Hard)
   - Self-paced learning with structured progression
 
-- 📈 **Analytics Dashboard**
+- **Analytics Dashboard**
   - Live sessions tracking
   - Historical performance insights
 
 ---
 
-## ⚙️ Tech Stack
+## Tech Stack
 
-### 💻 Frontend
+### Frontend
 - React.js
 - TypeScript
 - Tailwind CSS + DaisyUI
 - TanStack Query
 
-### 🔧 Backend
+### Backend
 - Node.js + Express
 - WebSockets
 - JWT Authentication (Clerk)
 
-### ☁️ DevOps & Cloud
+### DevOps & Cloud
 - Docker (Containerization)
 - Jenkins (CI/CD Automation)
 - Terraform (Infrastructure as Code)
@@ -54,14 +54,14 @@ A full-stack, real-time coding interview platform designed to simulate professio
 - AWS ECR (Image Registry)
 - AWS CloudWatch (Monitoring & Logs)
 
-### 🚀 Deployment
+### Deployment
 - Vercel (Frontend)
 - Render (Backend)
 - AWS (Automated Infra - Tested)
 
 ---
 
-## 🔄 CI/CD Pipeline
+## CI/CD Pipeline
 
 1. Code pushed to GitHub
 2. Jenkins triggers pipeline
@@ -73,7 +73,7 @@ A full-stack, real-time coding interview platform designed to simulate professio
 
 ---
 
-## 🚀 Real-World Use Cases
+## Real-World Use Cases
 
 - Technical interview platforms (like LeetCode, HackerRank)
 - Remote hiring and evaluation systems
@@ -82,7 +82,7 @@ A full-stack, real-time coding interview platform designed to simulate professio
 
 ---
 
-## 🔮 Future Enhancements
+## Future Enhancements
 
 - AI-based interview feedback & suggestions
 - Auto-scaling infrastructure using AWS policies
@@ -92,7 +92,7 @@ A full-stack, real-time coding interview platform designed to simulate professio
 
 ---
 
-## 📌 Key Highlights
+## Key Highlights
 
 - Built a **real-time distributed system**
 - Implemented **end-to-end DevOps automation**
@@ -101,13 +101,13 @@ A full-stack, real-time coding interview platform designed to simulate professio
 
 ---
 
-## 🔗 Live Demo
+## Live Demo
 
 👉 https://interview-iq-gamma.vercel.app/
 
 ---
 
-## 📁 Repository
+## Repository
 
 👉 https://github.com/neellokhandwala/InterviewIQ
 
